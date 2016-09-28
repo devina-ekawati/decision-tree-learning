@@ -1,5 +1,6 @@
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
+import weka.classifiers.trees.Id3;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -28,13 +29,27 @@ public class Main {
     }
 
     public static void J48(Instances data) {
-        J48 treeJ48 = new J48();         // new instance of tree
+        J48 tree = new J48();         // new instance of tree
         try {
-            treeJ48.buildClassifier(data);   // build classifier
+            tree.buildClassifier(data);   // build classifier
 
             Evaluation testEval = new Evaluation(data);
 
-            testEval.crossValidateModel(treeJ48, data, 10, new Random(1));
+            testEval.crossValidateModel(tree, data, 10, new Random(1));
+            System.out.println(testEval.toSummaryString("\nResults\n======\n", false));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void ID3(Instances data) {
+        Id3 tree = new Id3();         // new instance of tree
+        try {
+            tree.buildClassifier(data);   // build classifier
+
+            Evaluation testEval = new Evaluation(data);
+
+            testEval.crossValidateModel(tree, data, 10, new Random(1));
             System.out.println(testEval.toSummaryString("\nResults\n======\n", false));
         } catch (Exception e) {
             e.printStackTrace();
@@ -47,7 +62,7 @@ public class Main {
         if (data != null) {
             System.out.println(data);
 
-            J48(data);
+            ID3(data);
         }
 
     }
