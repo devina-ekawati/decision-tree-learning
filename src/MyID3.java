@@ -1,20 +1,19 @@
-import org.w3c.dom.Attr;
+import model.Node;
+import model.Tree;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
-import weka.core.matrix.Matrix;
 
 import java.util.Enumeration;
-import java.util.LinkedHashSet;
 
 import static java.lang.Math.log;
 
 /**
  * Created by user on 01/10/2016.
  */
-public class myID3 extends Classifier {
+public class MyID3 extends Classifier {
     public static Instances loadData(String filename) {
         ConverterUtils.DataSource source;
         Instances data = null;
@@ -36,7 +35,7 @@ public class myID3 extends Classifier {
         return log(x)/log(2);
     }
 
-    private double calculateEntropy(Instances data) {
+    public double calculateEntropy(Instances data) {
         double result = 0;
 
         double [] classCounts = new double[data.numClasses()];
@@ -48,7 +47,9 @@ public class myID3 extends Classifier {
 
         for (int i = 0; i < data.numClasses(); i++) {
             double proportion = classCounts[i]/(double) data.numInstances();
-            result -= proportion*log2(proportion);
+            if (proportion != 0) {
+                result -= proportion*log2(proportion);
+            }
         }
         return result;
     }
@@ -69,24 +70,59 @@ public class myID3 extends Classifier {
         return splitData;
     }
 
-    private double calculateAttributeEntropy(Instances data, Attribute attribute) {
+    public double calculateAttributeEntropy(Instances data, Attribute attribute) {
         double result = 0;
         Instances[] splitData = splitData(data, attribute);
 
         for (int i = 0; i < splitData.length; i++) {
-            double probabilistic = splitData[i].numInstances()/data.numInstances();
+            double probabilistic = splitData[i].numInstances()/(double) data.numInstances();
+//            System.out.println("attr numInstance : " + splitData[i].numInstances());
+//            System.out.println("numInstance : " + data.numInstances());
+//            System.out.println("probabilistic : " + probabilistic + "\n");
             result +=  probabilistic * calculateEntropy(splitData[i]);
+//            System.out.println("calculate entropy : " + calculateEntropy(splitData[i]) + "\n");
         }
         return result;
     }
 
 
-    private double calculateInformationGain(Instances data, Attribute attribute) {
+    public double calculateInformationGain(Instances data, Attribute attribute) {
         return (calculateEntropy(data) - calculateAttributeEntropy(data,attribute));
+    }
+
+    private int findBestAttribute(Instances data) {
+        int idxMax = 0;
+        double infoGainMax = 0;
+        double[] infoGain = new double[data.numAttributes()];
+        for(int i=0; i<data.numAttributes(); i++) {
+            infoGain[i] = calculateInformationGain(data, data.attribute(i));
+            if (infoGainMax < infoGain[i]) {
+                infoGainMax = infoGain[i];
+                idxMax = i;
+            }
+        }
+        return idxMax;
+    }
+
+    private Tree buildTree(Instances data) {
+        int bestAttribute = findBestAttribute(data);
+        Node root = new Node(data.attribute(bestAttribute).name());
+        Tree tree = new Tree(data.attribute(bestAttribute).name(), root);
+
+        Instances[] splitData = splitData(data, data.attribute(bestAttribute));
+        Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
+        for(Instances instances : splitData) {
+            bestAttribute = findBestAttribute(instances);
+            Node child = new Node( (String) enumAttr.nextElement());
+            tree.getNode(tree.getRoot()).addChild(data.attribute(bestAttribute).name(), child);
+            buildTree(data);
+        }
+
+        return tree;
     }
 
     @Override
     public void buildClassifier(Instances instances) throws Exception {
-
+        buildTree(instances);
     }
 }

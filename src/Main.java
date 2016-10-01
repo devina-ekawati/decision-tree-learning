@@ -13,6 +13,7 @@ import weka.filters.unsupervised.instance.Resample;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -131,40 +132,52 @@ public class Main {
         Main m = new Main();
         Instances data = m.loadData("data/weather.nominal.arff");
 
-        if (data != null) {
-//            System.out.println(data);
+        MyID3 myID3 = new MyID3();
+        System.out.println(data);
+        System.out.println("Total Entropy : " + myID3.calculateEntropy(data));
+        System.out.println(data.attribute(0));
+        System.out.println("Entropy Outlook : " + myID3.calculateAttributeEntropy(data, data.attribute(0)));
+        System.out.println("Information Gain Outlook : " + myID3.calculateInformationGain(data, data.attribute(0)));
+        System.out.println("Information Gain Temperature : " + myID3.calculateInformationGain(data, data.attribute(1)));
+        System.out.println("Information Gain Humidity : " + myID3.calculateInformationGain(data, data.attribute(2)));
+        System.out.println("Information Gain Windy : " + myID3.calculateInformationGain(data, data.attribute(3)));
 
-            try {
-//                Instances newData = m.resample(data);
-//                Instances newData = m.removeAttribute(data, 1, false);
-//                System.out.println(newData);
 
-                J48 tree = new J48();
-                m.classify(data, tree, 'c', 50);
 
-                Instance unseenData = new Instance(data.numAttributes());
-                data.add(unseenData);
-                unseenData.setDataset(data);
-
-                for (int i = 0; i < data.numAttributes() - 1; i++) {
-                    String[] attribute = data.attribute(i).toString().split(" ");
-                    System.out.print(attribute[1] + " " + attribute[2] + ": ");
-                    Scanner s = new Scanner(System.in);
-                    unseenData.setValue(data.attribute(i), s.nextLine());
-                }
-
-                System.out.println();
-                System.out.println("Instance: " + unseenData);
-                System.out.println();
-
-                Classifier classifier = m.loadModel("model.dat");
-                String[] classAttribute = data.classAttribute().toString().split(" ");
-                System.out.println(classAttribute[1] + " " + classAttribute[2] + ": " + data.classAttribute().value((int) classifier.classifyInstance(unseenData)));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+//        if (data != null) {
+////            System.out.println(data);
+//
+//            try {
+////                Instances newData = m.resample(data);
+////                Instances newData = m.removeAttribute(data, 1, false);
+////                System.out.println(newData);
+//
+//                J48 tree = new J48();
+//                m.classify(data, tree, 'c', 50);
+//
+//                Instance unseenData = new Instance(data.numAttributes());
+//                data.add(unseenData);
+//                unseenData.setDataset(data);
+//
+//                for (int i = 0; i < data.numAttributes() - 1; i++) {
+//                    String[] attribute = data.attribute(i).toString().split(" ");
+//                    System.out.print(attribute[1] + " " + attribute[2] + ": ");
+//                    Scanner s = new Scanner(System.in);
+//                    unseenData.setValue(data.attribute(i), s.nextLine());
+//                }
+//
+//                System.out.println();
+//                System.out.println("Instance: " + unseenData);
+//                System.out.println();
+//
+//                Classifier classifier = m.loadModel("model.dat");
+//                String[] classAttribute = data.classAttribute().toString().split(" ");
+//                System.out.println(classAttribute[1] + " " + classAttribute[2] + ": " + data.classAttribute().value((int) classifier.classifyInstance(unseenData)));
+//
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
 
     }
 }
