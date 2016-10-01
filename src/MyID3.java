@@ -6,6 +6,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import static java.lang.Math.log;
@@ -94,42 +95,64 @@ public class MyID3 extends Classifier {
         int idxMax = 0;
         double infoGainMax = 0;
         double[] infoGain = new double[data.numAttributes()];
-        for(int i=0; i<data.numAttributes(); i++) {
+        for(int i=0; i<data.numAttributes()-1; i++) {
             infoGain[i] = calculateInformationGain(data, data.attribute(i));
             if (infoGainMax < infoGain[i]) {
                 infoGainMax = infoGain[i];
                 idxMax = i;
             }
         }
+
         return idxMax;
     }
 
-    private void buildTree(Instances data, Tree tree, String parent, String value) {
-        // Find root
+    public void buildTree (Instances data, Tree tree, int parent) {
+        //create root
         int bestAttribute = findBestAttribute(data);
-        String rootName = data.attribute(bestAttribute).name();
-        Node rootNode = new Node(rootName);
-        if (parent == null) {
-            tree = new Tree(rootName, rootNode);
-        } else {
-            tree.addNode(parent, value, rootName, rootNode);
-        }
+
+        Node root = new Node(data.attribute(bestAttribute).name(), parent);
+        tree.addNode(root);
+
         Instances[] splitData = splitData(data, data.attribute(bestAttribute));
         Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
         for(Instances instances : splitData) {
-            buildTree(instances, tree, rootName, (String) enumAttr.nextElement());
-//            bestAttribute = findBestAttribute(instances);
-//            String childName = data.attribute(bestAttribute).name();
-//            Node childNode = new Node( (String) enumAttr.nextElement());
-//            tree.getNode(tree.getRoot()).addChild(childName, childNode);
-//            tree.addNode(childName, childNode);
+
         }
+
+
+
 
     }
 
+//    private void buildTree(Instances data, Tree tree, int parent, String value) {
+//        // Find root
+//        int bestAttribute = findBestAttribute(data);
+//        String rootName = data.attribute(bestAttribute).name();
+//
+//        Node rootNode = new Node(rootName, parent);
+//        if (tree.isEmpty()) {
+//            tree.addNode(rootNode);
+//        } else {
+//
+//            tree.addNode(parent, value, rootName, rootNode);
+//        }
+//
+//        tree.print();
+//        Instances[] splitData = splitData(data, data.attribute(bestAttribute));
+//        Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
+//        for(Instances instances : splitData) {
+//            buildTree(instances, tree, rootName, (String) enumAttr.nextElement());
+////            bestAttribute = findBestAttribute(instances);
+////            String childName = data.attribute(bestAttribute).name();
+////            Node childNode = new Node( (String) enumAttr.nextElement());
+////            tree.getNode(tree.getRoot()).addChild(childName, childNode);
+////            tree.addNode(childName, childNode);
+//        }
+//
+//    }
+
     @Override
     public void buildClassifier(Instances instances) throws Exception {
-        Tree tree = new Tree();
-        buildTree(instances, tree, null, null);
+
     }
 }

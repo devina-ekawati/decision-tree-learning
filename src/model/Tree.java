@@ -1,37 +1,36 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Tifani on 10/1/2016.
  */
 public class Tree {
-    private String root;
-    private HashMap<String, Node> nodes = new HashMap<>();
+    private ArrayList<Node> nodes = new ArrayList<>();
+    private HashMap<Integer, ArrayList<Integer>> table = new HashMap<>();
 
     public Tree() {
 
     }
 
-    public Tree(String rootName, Node rootNode) {
-        this.root = rootName;
-        nodes.put(rootName, rootNode);
+    public Tree(ArrayList<Node> nodes, HashMap<Integer, ArrayList<Integer>> table) {
+        this.nodes = nodes;
+        this.table = table;
     }
 
-    public String getRoot() {
-        return root;
+    public void addNode(Node node) {
+        nodes.add(node);
+        table.put(nodes.size(), new ArrayList<>());
+        if (node.getParent() != -1) {
+            ArrayList<Integer> value = table.get(node.getParent());
+            value.add(nodes.size()-1);
+            table.put(node.getParent(), value);
+        }
     }
 
-    public HashMap<String, Node> getNodes() {
-        return nodes;
-    }
-
-    public Node getNode(String nodeName) {
-        return nodes.get(nodeName);
-    }
-
-    public void addNode(String parent, String value, String nodeName, Node node) {
-        nodes.put(nodeName, node);
-        nodes.get(parent).addChild(value, node);
+    public boolean isEmpty() {
+        return nodes.isEmpty()&&table.isEmpty();
     }
 }

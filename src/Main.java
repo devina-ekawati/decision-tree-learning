@@ -128,19 +128,21 @@ public class Main {
         return classifier;
     }
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws Exception {
         Main m = new Main();
         Instances data = m.loadData("data/weather.nominal.arff");
 
         MyID3 myID3 = new MyID3();
-        System.out.println(data);
-        System.out.println("Total Entropy : " + myID3.calculateEntropy(data));
-        System.out.println(data.attribute(0));
-        System.out.println("Entropy Outlook : " + myID3.calculateAttributeEntropy(data, data.attribute(0)));
-        System.out.println("Information Gain Outlook : " + myID3.calculateInformationGain(data, data.attribute(0)));
-        System.out.println("Information Gain Temperature : " + myID3.calculateInformationGain(data, data.attribute(1)));
-        System.out.println("Information Gain Humidity : " + myID3.calculateInformationGain(data, data.attribute(2)));
-        System.out.println("Information Gain Windy : " + myID3.calculateInformationGain(data, data.attribute(3)));
+//        System.out.println(data);
+//        System.out.println("Total Entropy : " + myID3.calculateEntropy(data));
+//        System.out.println(data.attribute(0));
+//        System.out.println("Entropy Outlook : " + myID3.calculateAttributeEntropy(data, data.attribute(0)));
+//        System.out.println("Information Gain Outlook : " + myID3.calculateInformationGain(data, data.attribute(0)));
+//        System.out.println("Information Gain Temperature : " + myID3.calculateInformationGain(data, data.attribute(1)));
+//        System.out.println("Information Gain Humidity : " + myID3.calculateInformationGain(data, data.attribute(2)));
+//        System.out.println("Information Gain Windy : " + myID3.calculateInformationGain(data, data.attribute(3)));
+
+        myID3.buildClassifier(data);
 
 
 
