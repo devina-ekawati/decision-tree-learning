@@ -14,4 +14,3 @@ nbactions.xml
 build.xml
 manifest.mf
 .nb-gradle/
-lib/
