@@ -25,8 +25,8 @@ public class Node {
         return children.isEmpty();
     }
 
-    public void addChild(String childName, Node child) {
-        children.put(childName, child);
+    public void addChild(String value, Node child) {
+        children.put(value, child);
     }
 
     public Node getChild(String value) {

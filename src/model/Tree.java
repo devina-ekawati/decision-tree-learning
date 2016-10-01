@@ -9,6 +9,10 @@ public class Tree {
     private String root;
     private HashMap<String, Node> nodes = new HashMap<>();
 
+    public Tree() {
+
+    }
+
     public Tree(String rootName, Node rootNode) {
         this.root = rootName;
         nodes.put(rootName, rootNode);
@@ -26,7 +30,8 @@ public class Tree {
         return nodes.get(nodeName);
     }
 
-    public void addNode(String nodeName, Node node) {
+    public void addNode(String parent, String value, String nodeName, Node node) {
         nodes.put(nodeName, node);
+        nodes.get(parent).addChild(value, node);
     }
 }
