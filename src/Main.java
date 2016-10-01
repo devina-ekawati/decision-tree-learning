@@ -1,3 +1,4 @@
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.Id3;
@@ -28,28 +29,34 @@ public class Main {
         return data;
     }
 
+    public static Evaluation crossValidation(Instances data, Classifier tree) throws Exception {
+        Evaluation testEval = null;
+        testEval = new Evaluation(data);
+        testEval.crossValidateModel(tree, data, 10, new Random(1));
+
+        return testEval;
+
+    }
+
     public static void J48(Instances data) {
         J48 tree = new J48();         // new instance of tree
         try {
             tree.buildClassifier(data);   // build classifier
 
-            Evaluation testEval = new Evaluation(data);
-
-            testEval.crossValidateModel(tree, data, 10, new Random(1));
+            Evaluation testEval = crossValidation(data, tree);
             System.out.println(testEval.toSummaryString("\nResults\n======\n", false));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+
     public static void ID3(Instances data) {
         Id3 tree = new Id3();         // new instance of tree
         try {
             tree.buildClassifier(data);   // build classifier
 
-            Evaluation testEval = new Evaluation(data);
-
-            testEval.crossValidateModel(tree, data, 10, new Random(1));
+            Evaluation testEval = crossValidation(data, tree);
             System.out.println(testEval.toSummaryString("\nResults\n======\n", false));
         } catch (Exception e) {
             e.printStackTrace();
