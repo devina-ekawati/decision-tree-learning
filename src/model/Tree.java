@@ -21,6 +21,7 @@ public class Tree {
     }
 
     public void addNode(Node node) {
+        System.out.println(node.getName());
         nodes.add(node);
 
         table.put(nodes.size() - 1, new ArrayList<>());
@@ -31,8 +32,8 @@ public class Tree {
         }
     }
 
-    public Node getLastNode() {
-        return nodes.get(nodes.size() - 1);
+    public int getLastNode() {
+        return nodes.size()-1;
     }
 
     public boolean isEmpty() {
@@ -43,7 +44,7 @@ public class Tree {
         for (Map.Entry<Integer, ArrayList<Integer>> entry: table.entrySet()){
             nodes.get(entry.getKey()).print();
             for (int i = 0; i < entry.getValue().size(); i++) {
-                System.out.println("\t" + entry.getValue().get(i));
+                System.out.println("\t" + nodes.get(entry.getValue().get(i)).getName());
             }
         }
     }
