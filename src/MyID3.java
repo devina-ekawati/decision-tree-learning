@@ -107,21 +107,39 @@ public class MyID3 extends Classifier {
     }
 
     public void buildTree (Instances data, Tree tree, int parent) {
-        //create root
-        int bestAttribute = findBestAttribute(data);
 
-        Node root = new Node(data.attribute(bestAttribute).name(), parent);
-        tree.addNode(root);
+        if (data.numInstances() == 0) {
 
-        Instances[] splitData = splitData(data, data.attribute(bestAttribute));
-        Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
-        for(Instances instances : splitData) {
+        } else {
+            // Assign root to best attribute
+            int bestAttribute = findBestAttribute(data);
 
+            Node root = new Node(data.attribute(bestAttribute).name(), parent);
+            tree.addNode(root);
+
+            int parentIndex = tree.getLastNode().getParent();
+
+            boolean isAllSameClass = true;
+            for (int i = 1; i < data.numInstances(); i++) {
+                if (data.instance(0).classValue() != data.instance(i).classValue()) {
+                    isAllSameClass = false;
+                    break;
+                }
+            }
+
+            if (isAllSameClass) {
+                // If all attribute have same label
+                Node child = new Node(data.classAttribute().value((int) data.instance(0).classValue()), parentIndex);
+                tree.addNode(child);
+            } else {
+                Instances[] splitData = splitData(data, data.attribute(bestAttribute));
+                Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
+
+                for(Instances instances : splitData) {
+                    buildTree(instances, tree, parentIndex);
+                }
+            }
         }
-
-
-
-
     }
 
 //    private void buildTree(Instances data, Tree tree, int parent, String value) {
@@ -154,5 +172,19 @@ public class MyID3 extends Classifier {
     @Override
     public void buildClassifier(Instances instances) throws Exception {
 
+    }
+
+    public static void main(String[] args) {
+        MyID3 myID3 = new MyID3();
+//        System.out.println(data);
+//        System.out.println("Total Entropy : " + myID3.calculateEntropy(data));
+//        System.out.println(data.attribute(0));
+//        System.out.println("Entropy Outlook : " + myID3.calculateAttributeEntropy(data, data.attribute(0)));
+//        System.out.println("Information Gain Outlook : " + myID3.calculateInformationGain(data, data.attribute(0)));
+//        System.out.println("Information Gain Temperature : " + myID3.calculateInformationGain(data, data.attribute(1)));
+//        System.out.println("Information Gain Humidity : " + myID3.calculateInformationGain(data, data.attribute(2)));
+//        System.out.println("Information Gain Windy : " + myID3.calculateInformationGain(data, data.attribute(3)));
+
+//        myID3.buildClassifier(data);
     }
 }

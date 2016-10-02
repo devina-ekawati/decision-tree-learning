@@ -30,6 +30,10 @@ public class Tree {
         }
     }
 
+    public Node getLastNode() {
+        return nodes.get(nodes.size() - 1);
+    }
+
     public boolean isEmpty() {
         return nodes.isEmpty()&&table.isEmpty();
     }
