@@ -22,7 +22,8 @@ public class Tree {
 
     public void addNode(Node node) {
         nodes.add(node);
-        table.put(nodes.size(), new ArrayList<>());
+
+        table.put(nodes.size() - 1, new ArrayList<>());
         if (node.getParent() != -1) {
             ArrayList<Integer> value = table.get(node.getParent());
             value.add(nodes.size()-1);
@@ -36,5 +37,14 @@ public class Tree {
 
     public boolean isEmpty() {
         return nodes.isEmpty()&&table.isEmpty();
+    }
+
+    public void print() {
+        for (Map.Entry<Integer, ArrayList<Integer>> entry: table.entrySet()){
+            nodes.get(entry.getKey()).print();
+            for (int i = 0; i < entry.getValue().size(); i++) {
+                System.out.println("\t" + entry.getValue().get(i));
+            }
+        }
     }
 }

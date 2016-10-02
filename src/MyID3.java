@@ -36,15 +36,21 @@ public class MyID3 extends Classifier {
         return log(x)/log(2);
     }
 
-    public double calculateEntropy(Instances data) {
-        double result = 0;
-
+    private double[] countClassValue(Instances data) {
         double [] classCounts = new double[data.numClasses()];
         Enumeration instEnum = data.enumerateInstances();
         while (instEnum.hasMoreElements()) {
             Instance inst = (Instance) instEnum.nextElement();
             classCounts[(int) inst.classValue()]++;
         }
+
+        return classCounts;
+    }
+
+    public double calculateEntropy(Instances data) {
+        double result = 0;
+
+        double [] classCounts = countClassValue(data);
 
         for (int i = 0; i < data.numClasses(); i++) {
             double proportion = classCounts[i]/(double) data.numInstances();
@@ -106,10 +112,49 @@ public class MyID3 extends Classifier {
         return idxMax;
     }
 
-    public void buildTree (Instances data, Tree tree, int parent) {
+    public double findMostCommonClass(Instances data) {
+        double[] classCount = countClassValue(data);
 
-        if (data.numInstances() == 0) {
+        int maxIndex = 0;
+        for (int i = 1; i < classCount.length; i++) {
+            if (classCount[maxIndex] < classCount[i]) {
+                maxIndex = i;
+            }
+        }
 
+        return (double) maxIndex;
+    }
+
+    private boolean checkAttributesEmpty(ArrayList<Attribute> attributes) {
+        boolean cek = true;
+        for (int i = 0; i < attributes.size(); i++) {
+            if (attributes.get(i) != null) {
+                cek =  false;
+                break;
+            }
+        }
+        return cek;
+    }
+
+    public void buildTree (Instances data, Tree tree, int parent, ArrayList<Attribute> attributes) {
+
+        if (checkAttributesEmpty(attributes)) {
+            Node child = new Node(data.classAttribute().value((int) findMostCommonClass(data)), parent);
+            tree.addNode(child);
+        }
+
+        boolean isAllSameClass = true;
+        for (int i = 1; i < data.numInstances(); i++) {
+            if (data.instance(0).classValue() != data.instance(i).classValue()) {
+                isAllSameClass = false;
+                break;
+            }
+        }
+
+        if (isAllSameClass) {
+            // If all attribute have same label
+            Node child = new Node(data.classAttribute().value((int) data.instance(0).classValue()), parent);
+            tree.addNode(child);
         } else {
             // Assign root to best attribute
             int bestAttribute = findBestAttribute(data);
@@ -119,24 +164,17 @@ public class MyID3 extends Classifier {
 
             int parentIndex = tree.getLastNode().getParent();
 
-            boolean isAllSameClass = true;
-            for (int i = 1; i < data.numInstances(); i++) {
-                if (data.instance(0).classValue() != data.instance(i).classValue()) {
-                    isAllSameClass = false;
-                    break;
-                }
-            }
+            Instances[] splitData = splitData(data, data.attribute(bestAttribute));
+            Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
 
-            if (isAllSameClass) {
-                // If all attribute have same label
-                Node child = new Node(data.classAttribute().value((int) data.instance(0).classValue()), parentIndex);
-                tree.addNode(child);
-            } else {
-                Instances[] splitData = splitData(data, data.attribute(bestAttribute));
-                Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
-
-                for(Instances instances : splitData) {
-                    buildTree(instances, tree, parentIndex);
+            for(Instances instances : splitData) {
+                if (instances.numInstances() == 0) {
+                    // Assign child to most common value
+                    Node child = new Node(data.classAttribute().value((int) findMostCommonClass(data)), parent);
+                    tree.addNode(child);
+                } else {
+                    attributes.set(bestAttribute,null);
+                    buildTree(instances, tree, parentIndex, attributes);
                 }
             }
         }
@@ -176,6 +214,16 @@ public class MyID3 extends Classifier {
 
     public static void main(String[] args) {
         MyID3 myID3 = new MyID3();
+        Instances data = loadData("data/weather.nominal.arff");
+
+        ArrayList<Attribute> attributes = new ArrayList<>();
+        for (int i = 0; i < data.numAttributes(); i++) {
+            attributes.add(data.attribute(i));
+        }
+
+        Tree tree = new Tree();
+        myID3.buildTree(data, tree, -1, attributes);
+        tree.print();
 //        System.out.println(data);
 //        System.out.println("Total Entropy : " + myID3.calculateEntropy(data));
 //        System.out.println(data.attribute(0));
