@@ -20,7 +20,7 @@ public class Tree {
         this.table = table;
     }
 
-    public void addNode(Node node) {
+    public void addNode(Node node, String childValue) {
         System.out.println(node.getName());
         nodes.add(node);
 
@@ -29,6 +29,7 @@ public class Tree {
             ArrayList<Integer> value = table.get(node.getParent());
             value.add(nodes.size()-1);
             table.put(node.getParent(), value);
+            nodes.get(node.getParent()).addChild(childValue, node.getName());
         }
     }
 

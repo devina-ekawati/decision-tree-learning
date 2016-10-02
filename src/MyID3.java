@@ -136,11 +136,11 @@ public class MyID3 extends Classifier {
         return cek;
     }
 
-    public void buildTree (Instances data, Tree tree, int parent, ArrayList<Attribute> attributes) {
+    public void buildTree (Instances data, Tree tree, int parent, ArrayList<Attribute> attributes, String childValue) {
 
         if (checkAttributesEmpty(attributes)) {
             Node child = new Node(data.classAttribute().value((int) findMostCommonClass(data)), parent);
-            tree.addNode(child);
+            tree.addNode(child, childValue);
         }
 
         boolean isAllSameClass = true;
@@ -154,13 +154,13 @@ public class MyID3 extends Classifier {
         if (isAllSameClass) {
             // If all attribute have same label
             Node child = new Node(data.classAttribute().value((int) data.instance(0).classValue()), parent);
-            tree.addNode(child);
+            tree.addNode(child, childValue);
         } else {
             // Assign root to best attribute
             int bestAttribute = findBestAttribute(data);
 
             Node root = new Node(data.attribute(bestAttribute).name(), parent);
-            tree.addNode(root);
+            tree.addNode(root,childValue);
 
             int parentIndex = tree.getLastNode();
 
@@ -171,10 +171,10 @@ public class MyID3 extends Classifier {
                 if (instances.numInstances() == 0) {
                     // Assign child to most common value
                     Node child = new Node(data.classAttribute().value((int) findMostCommonClass(data)), parent);
-                    tree.addNode(child);
+                    tree.addNode(child,enumAttr.nextElement().toString());
                 } else {
                     attributes.set(bestAttribute,null);
-                    buildTree(instances, tree, parentIndex, attributes);
+                    buildTree(instances, tree, parentIndex, attributes,enumAttr.nextElement().toString());
                 }
             }
         }
@@ -222,7 +222,7 @@ public class MyID3 extends Classifier {
         }
 
         Tree tree = new Tree();
-        myID3.buildTree(data, tree, -1, attributes);
+        myID3.buildTree(data, tree, -1, attributes, null);
         tree.print();
 //        System.out.println(data);
 //        System.out.println("Total Entropy : " + myID3.calculateEntropy(data));
