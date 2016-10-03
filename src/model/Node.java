@@ -24,6 +24,10 @@ public class Node {
         return parent;
     }
 
+    public double getName() {
+        return name;
+    }
+
     public double getLabel() {
         return label;
     }
@@ -46,6 +50,10 @@ public class Node {
 
     public void addChild(Double value, Integer child) {
         children.put(value, child);
+    }
+
+    public Integer findChild(Double value) {
+        return children.get(value);
     }
 
     public void print(Double childKey, ArrayList<Attribute> attribute) {

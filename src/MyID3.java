@@ -197,33 +197,24 @@ public class MyID3 extends Classifier {
 
         tree = new Tree();
         buildTree(instances, tree, -1, attributes, null);
-        System.out.println("build classifier");
-
-
         tree.print(fixedAttribute);
+
+        Instance ins = instances.instance(4);
+        System.out.println("Classify instance: " + ins);
+        System.out.println("Result: " + classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) classifyInstance(ins)));
     }
 
     @Override
     public double classifyInstance(Instance instance) {
-        double r = 0;
-        String currentNode;
 
         Node node = tree.getNode(0);
-        //currentNode = node.getName();
         while (!node.isLeaf()) {
-
+            double attr = node.getName();
+            Integer childIdx = node.findChild(instance.value((int) attr) + 1);
+            node = tree.getNode(childIdx);
         }
 
-        return r;
-    }
-
-    public void printTree() {
-//        for (Map.Entry<Integer, ArrayList<Integer>> entry: tree.getTable().entrySet()){
-//            tree.getNodes().get(entry.getKey()).print();
-//            for (int i = 0; i < entry.getValue().size(); i++) {
-//                System.out.println("\t" + tree.getNodes().get(entry.getValue().get(i)).getName());
-//            }
-//        }
+        return node.getLabel();
     }
 
     public static void main(String[] args) {
