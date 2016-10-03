@@ -20,16 +20,12 @@ public class Node {
         this.parent = parent;
     }
 
-    public double getName() {
-        return name;
-    }
-
     public int getParent() {
         return parent;
     }
 
-    public void setParent(int parent) {
-        this.parent = parent;
+    public double getLabel() {
+        return label;
     }
 
     public void setLabel(double label) {
@@ -52,14 +48,10 @@ public class Node {
         children.put(value, child);
     }
 
-    public void print(ArrayList<Attribute> attribute) {
+    public void print(Double childKey, ArrayList<Attribute> attribute) {
         if (!isLeaf())
-            System.out.println("Node " + attribute.get((int) name).name());
+            System.out.print(attribute.get((int) name).name() + " = " + attribute.get((int) name).value(childKey.intValue()-1));
         else
-            System.out.println("Node " + attribute.get((int) name).value((int) label));
-        for (Map.Entry<Double, Integer> entry: children.entrySet()){
-            System.out.println("\t" + entry.getKey().intValue() + " " + entry.getValue().intValue());
-            // System.out.println("\t" + attribute.get((int) name).value(entry.getKey().intValue()-1) + " " + attribute.get(entry.getValue()).name());
-        }
+            System.out.print(attribute.get((int) name).value((int) label));
     }
 }

@@ -164,9 +164,9 @@ public class MyID3 extends Classifier {
             int bestAttribute = findBestAttribute(data);
 
             Node root = new Node((double) bestAttribute, parent);
-            tree.addNode(root,childValue);
+            tree.addNode(root, childValue);
 
-            int parentIndex = tree.getLastNode();
+            int parentIndex = tree.getLastIdx();
 
             Instances[] splitData = splitData(data, data.attribute(bestAttribute));
             Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();

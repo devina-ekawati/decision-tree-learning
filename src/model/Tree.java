@@ -10,53 +10,56 @@ import java.util.Map;
  * Created by Tifani on 10/1/2016.
  */
 public class Tree {
-    private ArrayList<Node> nodes = new ArrayList<>();
-    private HashMap<Integer, ArrayList<Integer>> table = new HashMap<>();
+    private HashMap<Integer, Node> table = new HashMap<>();
+    private int idx = 0;
 
     public Tree() {
 
     }
 
-    public Tree(ArrayList<Node> nodes, HashMap<Integer, ArrayList<Integer>> table) {
-        this.nodes = nodes;
-        this.table = table;
-    }
-
-    public HashMap<Integer, ArrayList<Integer>> getTable() {
+    public HashMap<Integer, Node> getTable() {
         return table;
     }
 
-    public ArrayList<Node> getNodes() {
-        return nodes;
+    public int getLastIdx() {
+        return idx-1;
     }
 
     public void addNode(Node node, Double childValue) {
-        nodes.add(node);
+        table.put(idx, node);
 
-        table.put(nodes.size() - 1, new ArrayList<>());
         if (node.getParent() != -1) {
-            ArrayList<Integer> value = table.get(node.getParent());
-            value.add(nodes.size()-1);
-            table.put(node.getParent(), value);
-            // nodes.get(node.getParent()).addChild(childValue, node.getName());
+            table.get(node.getParent()).addChild(childValue, idx);
         }
+        idx++;
     }
 
     public Node getNode(Integer index) {
-        return nodes.get(index);
-    }
-
-    public int getLastNode() {
-        return nodes.size()-1;
-    }
-
-    public boolean isEmpty() {
-        return nodes.isEmpty()&&table.isEmpty();
+        return table.get(index);
     }
 
     public void print(ArrayList<Attribute> attributes) {
-        for (Map.Entry<Integer, ArrayList<Integer>> entry: table.entrySet()){
-            nodes.get(entry.getKey()).print(attributes);
+        int rootIdx = 0;
+        printTree(rootIdx, "", attributes);
+    }
+
+    public void printTree (Integer nodeIdx, String tab, ArrayList<Attribute> attributes) {
+        Node node = table.get(nodeIdx);
+        HashMap<Double, Integer> children = table.get(nodeIdx).getChildren();
+        for (Map.Entry<Double, Integer> entry: children.entrySet()) {
+            int childIdx = entry.getValue();
+            if (node.isRoot())
+                node.print(entry.getKey(), attributes);
+            else {
+                System.out.print(tab);
+                node.print(entry.getKey(), attributes);
+            }
+            if (!table.get(childIdx).isLeaf())
+                System.out.println("");
+            printTree(childIdx, tab + "|\t", attributes);
+        }
+        if (node.isLeaf()) {
+            System.out.println(" : " + attributes.get(attributes.size()-1).value((int) node.getLabel()));
         }
     }
 }
