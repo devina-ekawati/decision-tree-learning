@@ -21,7 +21,6 @@ public class Tree {
     }
 
     public void addNode(Node node, String childValue) {
-        System.out.println(node.getName());
         nodes.add(node);
 
         table.put(nodes.size() - 1, new ArrayList<>());

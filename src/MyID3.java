@@ -180,50 +180,23 @@ public class MyID3 extends Classifier {
         }
     }
 
-//    private void buildTree(Instances data, Tree tree, int parent, String value) {
-//        // Find root
-//        int bestAttribute = findBestAttribute(data);
-//        String rootName = data.attribute(bestAttribute).name();
-//
-//        Node rootNode = new Node(rootName, parent);
-//        if (tree.isEmpty()) {
-//            tree.addNode(rootNode);
-//        } else {
-//
-//            tree.addNode(parent, value, rootName, rootNode);
-//        }
-//
-//        tree.print();
-//        Instances[] splitData = splitData(data, data.attribute(bestAttribute));
-//        Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
-//        for(Instances instances : splitData) {
-//            buildTree(instances, tree, rootName, (String) enumAttr.nextElement());
-////            bestAttribute = findBestAttribute(instances);
-////            String childName = data.attribute(bestAttribute).name();
-////            Node childNode = new Node( (String) enumAttr.nextElement());
-////            tree.getNode(tree.getRoot()).addChild(childName, childNode);
-////            tree.addNode(childName, childNode);
-//        }
-//
-//    }
-
     @Override
     public void buildClassifier(Instances instances) throws Exception {
+        ArrayList<Attribute> attributes = new ArrayList<>();
+        for (int i = 0; i < instances.numAttributes(); i++) {
+            attributes.add(instances.attribute(i));
+        }
 
+        Tree tree = new Tree();
+        buildTree(instances, tree, -1, attributes, null);
+        tree.print();
     }
 
     public static void main(String[] args) {
         MyID3 myID3 = new MyID3();
         Instances data = loadData("data/weather.nominal.arff");
 
-        ArrayList<Attribute> attributes = new ArrayList<>();
-        for (int i = 0; i < data.numAttributes(); i++) {
-            attributes.add(data.attribute(i));
-        }
 
-        Tree tree = new Tree();
-        myID3.buildTree(data, tree, -1, attributes, null);
-        tree.print();
 //        System.out.println(data);
 //        System.out.println("Total Entropy : " + myID3.calculateEntropy(data));
 //        System.out.println(data.attribute(0));
@@ -233,6 +206,10 @@ public class MyID3 extends Classifier {
 //        System.out.println("Information Gain Humidity : " + myID3.calculateInformationGain(data, data.attribute(2)));
 //        System.out.println("Information Gain Windy : " + myID3.calculateInformationGain(data, data.attribute(3)));
 
-//        myID3.buildClassifier(data);
+        try {
+            myID3.buildClassifier(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
