@@ -8,6 +8,7 @@ import weka.core.converters.ConverterUtils;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Map;
 
 import static java.lang.Math.log;
 
@@ -15,6 +16,8 @@ import static java.lang.Math.log;
  * Created by user on 01/10/2016.
  */
 public class MyID3 extends Classifier {
+    private Tree tree;
+
     public static Instances loadData(String filename) {
         ConverterUtils.DataSource source;
         Instances data = null;
@@ -136,10 +139,10 @@ public class MyID3 extends Classifier {
         return cek;
     }
 
-    public void buildTree (Instances data, Tree tree, int parent, ArrayList<Attribute> attributes, String childValue) {
+    public void buildTree (Instances data, Tree tree, int parent, ArrayList<Attribute> attributes, Double childValue) {
 
         if (checkAttributesEmpty(attributes)) {
-            Node child = new Node(data.classAttribute().value((int) findMostCommonClass(data)), parent);
+            Node child = new Node(findMostCommonClass(data), parent);
             tree.addNode(child, childValue);
         }
 
@@ -153,13 +156,14 @@ public class MyID3 extends Classifier {
 
         if (isAllSameClass) {
             // If all attribute have same label
-            Node child = new Node(data.classAttribute().value((int) data.instance(0).classValue()), parent);
+            Node child = new Node((double) data.classAttribute().index(), parent);
+            child.setLabel(data.instance(0).classValue());
             tree.addNode(child, childValue);
         } else {
             // Assign root to best attribute
             int bestAttribute = findBestAttribute(data);
 
-            Node root = new Node(data.attribute(bestAttribute).name(), parent);
+            Node root = new Node((double) bestAttribute, parent);
             tree.addNode(root,childValue);
 
             int parentIndex = tree.getLastNode();
@@ -167,14 +171,16 @@ public class MyID3 extends Classifier {
             Instances[] splitData = splitData(data, data.attribute(bestAttribute));
             Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
 
+            int attrValue = 0;
             for(Instances instances : splitData) {
+                attrValue++;
                 if (instances.numInstances() == 0) {
                     // Assign child to most common value
-                    Node child = new Node(data.classAttribute().value((int) findMostCommonClass(data)), parent);
-                    tree.addNode(child,enumAttr.nextElement().toString());
+                    Node child = new Node(findMostCommonClass(data), parent);
+                    tree.addNode(child, (double) attrValue);
                 } else {
                     attributes.set(bestAttribute,null);
-                    buildTree(instances, tree, parentIndex, attributes,enumAttr.nextElement().toString());
+                    buildTree(instances, tree, parentIndex, attributes, (double) attrValue);
                 }
             }
         }
@@ -183,13 +189,41 @@ public class MyID3 extends Classifier {
     @Override
     public void buildClassifier(Instances instances) throws Exception {
         ArrayList<Attribute> attributes = new ArrayList<>();
+        ArrayList<Attribute> fixedAttribute = new ArrayList<>();
         for (int i = 0; i < instances.numAttributes(); i++) {
             attributes.add(instances.attribute(i));
+            fixedAttribute.add(instances.attribute(i));
         }
 
-        Tree tree = new Tree();
+        tree = new Tree();
         buildTree(instances, tree, -1, attributes, null);
-        tree.print();
+        System.out.println("build classifier");
+
+
+        tree.print(fixedAttribute);
+    }
+
+    @Override
+    public double classifyInstance(Instance instance) {
+        double r = 0;
+        String currentNode;
+
+        Node node = tree.getNode(0);
+        //currentNode = node.getName();
+        while (!node.isLeaf()) {
+
+        }
+
+        return r;
+    }
+
+    public void printTree() {
+//        for (Map.Entry<Integer, ArrayList<Integer>> entry: tree.getTable().entrySet()){
+//            tree.getNodes().get(entry.getKey()).print();
+//            for (int i = 0; i < entry.getValue().size(); i++) {
+//                System.out.println("\t" + tree.getNodes().get(entry.getValue().get(i)).getName());
+//            }
+//        }
     }
 
     public static void main(String[] args) {
