@@ -7,6 +7,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Discretize;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.instance.RemovePercentage;
 import weka.filters.unsupervised.instance.Resample;
@@ -130,37 +131,35 @@ public class Main {
 
     public static void main(String args[]) throws Exception {
         Main m = new Main();
-        Instances data = m.loadData("data/weather.nominal.arff");
+        Instances data = m.loadData("data/weather.numeric.arff");
 
         if (data != null) {
-//            System.out.println(data);
-            System.out.println(data.classAttribute().value((int) data.instance(0).classValue()));
             try {
 //                Instances newData = m.resample(data);
 //                Instances newData = m.removeAttribute(data, 1, false);
 //                System.out.println(newData);
 
-                J48 tree = new J48();
+                Id3 tree = new Id3();
                 m.classify(data, tree, 'c', 50);
 
-                Instance unseenData = new Instance(data.numAttributes());
-                data.add(unseenData);
-                unseenData.setDataset(data);
-
-                for (int i = 0; i < data.numAttributes() - 1; i++) {
-                    String[] attribute = data.attribute(i).toString().split(" ");
-                    System.out.print(attribute[1] + " " + attribute[2] + ": ");
-                    Scanner s = new Scanner(System.in);
-                    unseenData.setValue(data.attribute(i), s.nextLine());
-                }
-
-                System.out.println();
-                System.out.println("Instance: " + unseenData);
-                System.out.println();
-
-                Classifier classifier = m.loadModel("model.dat");
-                String[] classAttribute = data.classAttribute().toString().split(" ");
-                System.out.println(classAttribute[1] + " " + classAttribute[2] + ": " + data.classAttribute().value((int) classifier.classifyInstance(unseenData)));
+//                Instance unseenData = new Instance(data.numAttributes());
+//                data.add(unseenData);
+//                unseenData.setDataset(data);
+//
+//                for (int i = 0; i < data.numAttributes() - 1; i++) {
+//                    String[] attribute = data.attribute(i).toString().split(" ");
+//                    System.out.print(attribute[1] + " " + attribute[2] + ": ");
+//                    Scanner s = new Scanner(System.in);
+//                    unseenData.setValue(data.attribute(i), s.nextLine());
+//                }
+//
+//                System.out.println();
+//                System.out.println("Instance: " + unseenData);
+//                System.out.println();
+//
+//                Classifier classifier = m.loadModel("model.dat");
+//                String[] classAttribute = data.classAttribute().toString().split(" ");
+//                System.out.println(classAttribute[1] + " " + classAttribute[2] + ": " + data.classAttribute().value((int) classifier.classifyInstance(unseenData)));
 
             } catch (Exception e) {
                 e.printStackTrace();
