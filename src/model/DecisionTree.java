@@ -169,7 +169,12 @@ public class DecisionTree {
                 tree.addNode(child, childValue);
             } else {
                 // Assign root to best attribute
-                int bestAttribute = findBestAttribute(data, attributes);
+                ArrayList<Attribute> newAttributes = new ArrayList<>();
+                for (int i = 0; i < attributes.size(); i++) {
+                    newAttributes.add(attributes.get(i));
+                }
+
+                int bestAttribute = findBestAttribute(data, newAttributes);
                 System.out.println("Best attr: " + data.attribute(bestAttribute).name());
 
                 Node root = new Node((double) bestAttribute, parent);
@@ -188,8 +193,8 @@ public class DecisionTree {
                         Node child = new Node(findMostCommonClass(data), parent);
                         tree.addNode(child, (double) attrValue);
                     } else {
-                        attributes.set(bestAttribute, null);
-                        buildTree(instances, tree, parentIndex, attributes, (double) attrValue);
+                        newAttributes.set(bestAttribute, null);
+                        buildTree(instances, tree, parentIndex, newAttributes, (double) attrValue);
                     }
                 }
             }

@@ -55,7 +55,7 @@ public class MyID3 extends Classifier {
 
     public static void main(String[] args) {
         MyID3 myID3 = new MyID3();
-        Instances data = loadData("data/weather.nominal.arff");
+        Instances data = loadData("data/contact-lenses.arff");
 
         try {
             myID3.buildClassifier(data);
