@@ -42,6 +42,8 @@ public class MyJ48 extends Classifier{
         tree = new Tree();
         decisionTree.buildTree(instances, tree, -1, attributes, null);
         tree.print(fixedAttribute);
+        System.out.println("TABLE");
+        tree.printTable(fixedAttribute);
     }
 
     public static void main(String[] args) {

@@ -62,4 +62,19 @@ public class Tree {
             System.out.println(" : " + attributes.get(attributes.size()-1).value((int) node.getLabel()));
         }
     }
+
+    public void printTable(ArrayList<Attribute> attributes) {
+        for (Map.Entry<Integer, Node> entry: table.entrySet()) {
+            if (entry.getValue().isLeaf()) {
+                System.out.println(entry.getKey() + ": " + attributes.get(attributes.size()-1).value((int) entry.getValue().getLabel()));
+            }
+            else {
+                System.out.println(entry.getKey() + ": " + attributes.get((int) entry.getValue().getName()).name());
+                HashMap<Double, Integer> children = entry.getValue().getChildren();
+                for (Map.Entry<Double, Integer> child: children.entrySet()) {
+                    System.out.println("\t" + attributes.get((int) entry.getValue().getName()).value(child.getKey().intValue()-1) + " -> " + child.getValue());
+                }
+            }
+        }
+    }
 }

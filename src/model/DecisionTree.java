@@ -79,16 +79,25 @@ public class DecisionTree {
 
     public double calculateAttributeEntropy(Instances data, Attribute attribute) {
         double result = 0;
-        Instances[] splitData = splitData(data, attribute);
+        // System.out.println("SUMMARY:");
+        // System.out.println(data.toSummaryString());
+        try {
+            Instances[] splitData = splitData(data, attribute);
 
-        for (int i = 0; i < splitData.length; i++) {
-            double probabilistic = splitData[i].numInstances()/(double) data.numInstances();
+            for (int i = 0; i < splitData.length; i++) {
+                double probabilistic = splitData[i].numInstances()/(double) data.numInstances();
 //            System.out.println("attr numInstance : " + splitData[i].numInstances());
 //            System.out.println("numInstance : " + data.numInstances());
 //            System.out.println("probabilistic : " + probabilistic + "\n");
-            result +=  probabilistic * calculateEntropy(splitData[i]);
+                if (probabilistic != 0)
+                    result +=  probabilistic * calculateEntropy(splitData[i]);
 //            System.out.println("calculate entropy : " + calculateEntropy(splitData[i]) + "\n");
+            }
+            splitData = null;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        // System.out.println("Attr entropy: " + result);
         return result;
     }
 
@@ -97,18 +106,22 @@ public class DecisionTree {
         return (calculateEntropy(data) - calculateAttributeEntropy(data,attribute));
     }
 
-    private int findBestAttribute(Instances data) {
+    private int findBestAttribute(Instances data, ArrayList<Attribute> attributes) {
         int idxMax = 0;
-        double infoGainMax = 0;
+        while (attributes.get(idxMax) == null) {
+            idxMax++;
+        }
+        double infoGainMax = calculateInformationGain(data, data.attribute(idxMax));
         double[] infoGain = new double[data.numAttributes()];
-        for(int i=0; i<data.numAttributes()-1; i++) {
+        // System.out.println("Info gain max: " + infoGainMax);
+        for(int i=idxMax; i<data.numAttributes()-1; i++) {
             infoGain[i] = calculateInformationGain(data, data.attribute(i));
-            if (infoGainMax < infoGain[i]) {
+            // System.out.println("Info gain ke-" + i + ": " + infoGain[i]);
+            if (infoGainMax < infoGain[i] && attributes.get(i) != null) {
                 infoGainMax = infoGain[i];
                 idxMax = i;
             }
         }
-
         return idxMax;
     }
 
@@ -137,47 +150,47 @@ public class DecisionTree {
     }
 
     public void buildTree (Instances data, Tree tree, int parent, ArrayList<Attribute> attributes, Double childValue) {
-
         if (checkAttributesEmpty(attributes)) {
             Node child = new Node(findMostCommonClass(data), parent);
             tree.addNode(child, childValue);
-        }
-
-        boolean isAllSameClass = true;
-        for (int i = 1; i < data.numInstances(); i++) {
-            if (data.instance(0).classValue() != data.instance(i).classValue()) {
-                isAllSameClass = false;
-                break;
-            }
-        }
-
-        if (isAllSameClass) {
-            // If all attribute have same label
-            Node child = new Node((double) data.classAttribute().index(), parent);
-            child.setLabel(data.instance(0).classValue());
-            tree.addNode(child, childValue);
         } else {
-            // Assign root to best attribute
-            int bestAttribute = findBestAttribute(data);
+            boolean isAllSameClass = true;
+            for (int i = 1; i < data.numInstances(); i++) {
+                if (data.instance(0).classValue() != data.instance(i).classValue()) {
+                    isAllSameClass = false;
+                    break;
+                }
+            }
 
-            Node root = new Node((double) bestAttribute, parent);
-            tree.addNode(root, childValue);
+            if (isAllSameClass) {
+                // If all attribute have same label
+                Node child = new Node((double) data.classAttribute().index(), parent);
+                child.setLabel(data.instance(0).classValue());
+                tree.addNode(child, childValue);
+            } else {
+                // Assign root to best attribute
+                int bestAttribute = findBestAttribute(data, attributes);
+                System.out.println("Best attr: " + data.attribute(bestAttribute).name());
 
-            int parentIndex = tree.getLastIdx();
+                Node root = new Node((double) bestAttribute, parent);
+                tree.addNode(root, childValue);
 
-            Instances[] splitData = splitData(data, data.attribute(bestAttribute));
-            Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
+                int parentIndex = tree.getLastIdx();
 
-            int attrValue = 0;
-            for(Instances instances : splitData) {
-                attrValue++;
-                if (instances.numInstances() == 0) {
-                    // Assign child to most common value
-                    Node child = new Node(findMostCommonClass(data), parent);
-                    tree.addNode(child, (double) attrValue);
-                } else {
-                    attributes.set(bestAttribute,null);
-                    buildTree(instances, tree, parentIndex, attributes, (double) attrValue);
+                Instances[] splitData = splitData(data, data.attribute(bestAttribute));
+                Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
+
+                int attrValue = 0;
+                for(Instances instances : splitData) {
+                    attrValue++;
+                    if (instances.numInstances() == 0) {
+                        // Assign child to most common value
+                        Node child = new Node(findMostCommonClass(data), parent);
+                        tree.addNode(child, (double) attrValue);
+                    } else {
+                        attributes.set(bestAttribute, null);
+                        buildTree(instances, tree, parentIndex, attributes, (double) attrValue);
+                    }
                 }
             }
         }
