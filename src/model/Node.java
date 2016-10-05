@@ -52,6 +52,16 @@ public class Node {
         children.put(value, child);
     }
 
+    public void deleteChild(Integer child) {
+        int idx;
+        for (Map.Entry<Double, Integer> entry: children.entrySet()) {
+            if (entry.getValue() == child) {
+                children.remove(entry.getKey());
+                break;
+            }
+        }
+    }
+
     public Integer findChild(Double value) {
         return children.get(value);
     }

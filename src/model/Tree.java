@@ -39,6 +39,13 @@ public class Tree {
         idx++;
     }
 
+    public void deleteNode(Integer idx) {
+        // Delete parent information about this node
+        table.get(table.get(idx).getParent()).deleteChild(idx);
+        // Detele the node from table
+        table.remove(idx);
+    }
+
     public Node getNode(Integer index) {
         return table.get(index);
     }

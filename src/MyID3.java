@@ -33,7 +33,10 @@ public class MyID3 extends Classifier {
 
         tree = new Tree();
         decisionTree.buildTree(instances, tree, -1, attributes, null);
+        System.out.println("Tree:");
         tree.print(fixedAttribute);
+        System.out.println("Accuracy: " + calculateAccuracy(instances));
+
 
         Instance ins = instances.instance(4);
         System.out.println("Classify instance: " + ins);
@@ -54,6 +57,15 @@ public class MyID3 extends Classifier {
             return Instance.missingValue();
         else
             return node.getLabel();
+    }
+
+    public double calculateAccuracy(Instances instances) {
+        int truePrediction = 0;
+        for(int i=0; i<instances.numInstances(); i++) {
+            if (instances.instance(i).classValue() == classifyInstance(instances.instance(i)))
+                truePrediction ++;
+        }
+        return truePrediction/instances.numInstances();
     }
 
     public static void main(String[] args) {
