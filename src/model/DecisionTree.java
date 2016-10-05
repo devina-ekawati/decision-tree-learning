@@ -162,6 +162,11 @@ public class DecisionTree {
                 }
             }
 
+            System.out.println(parent);
+            System.out.println("isAllSame = " + isAllSameClass);
+            System.out.println("DATA");
+            System.out.println(data);
+
             if (isAllSameClass) {
                 // If all attribute have same label
                 Node child = new Node((double) data.classAttribute().index(), parent);

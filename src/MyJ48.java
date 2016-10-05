@@ -48,7 +48,7 @@ public class MyJ48 extends Classifier{
 
     public static void main(String[] args) {
         MyJ48 myJ48 = new MyJ48();
-        Instances data = loadData("data/iris.arff");
+        Instances data = loadData("data/weather.numeric.arff");
 
         try {
             myJ48.buildClassifier(data);
