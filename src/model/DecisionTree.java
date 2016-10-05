@@ -197,8 +197,8 @@ public class DecisionTree {
                     attrValue++;
                     if (instances.numInstances() == 0) {
                         // Assign child to most common value
-                        Node child = new Node((double) -1, parentIndex); // TODO: ini bener ga sih harusnya diassign null?
-                        child.setLabel((double) -1);
+                        Node child = new Node(findMostCommonClass(data), parentIndex); // TODO: ini bener ga sih harusnya diassign null?
+                        child.setLabel(findMostCommonClass(data));
                         tree.addNode(child, (double) attrValue);
                     } else {
                         newAttributes.set(bestAttribute, null);
