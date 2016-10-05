@@ -27,6 +27,8 @@ public class MyJ48 extends Classifier{
         return Filter.useFilter(data, filter);
     }
 
+    //Todo: bikin preprocess untuk nanganin missing value
+
     @Override
     public void buildClassifier(Instances instances) throws Exception {
         DecisionTree decisionTree = new DecisionTree();
