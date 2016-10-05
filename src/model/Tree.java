@@ -49,6 +49,8 @@ public class Tree {
                 //table.get(idx).deleteChild(entry.getValue());
             }
 
+            //Set nodenya dengan label classValue => ClassValue ditentukan dari kelas dengan instance terbanyak dari node sebelumnya
+
         } else {
             //Rekursif disini kalau dia anaknya bukan leaf semua hrus hapus pohon anaknya juga
         }
