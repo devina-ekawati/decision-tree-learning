@@ -50,7 +50,10 @@ public class MyID3 extends Classifier {
             node = tree.getNode(childIdx);
         }
 
-        return node.getLabel();
+        if ( (int) node.getLabel() == -1 )
+            return Instance.missingValue();
+        else
+            return node.getLabel();
     }
 
     public static void main(String[] args) {

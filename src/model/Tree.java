@@ -26,10 +26,15 @@ public class Tree {
     }
 
     public void addNode(Node node, Double childValue) {
-        table.put(idx, node);
-
+        int currentIdx = idx;
+        table.put(currentIdx, node);
+//        if (!node.isLeaf())
+//            System.out.println("ADD NODE: [" + idx + "] " + node.getName());
+//        else
+//            System.out.println("ADD NODE: [" + idx + "] " + node.getLabel() + " > leaf");
+//        System.out.println("PARENT: " + node.getParent() + " CHILD VALUE: " + childValue);
         if (node.getParent() != -1) {
-            table.get(node.getParent()).addChild(childValue, idx);
+            table.get(node.getParent()).addChild(childValue, currentIdx);
         }
         idx++;
     }
@@ -59,22 +64,25 @@ public class Tree {
             printTree(childIdx, tab + "|\t", attributes);
         }
         if (node.isLeaf()) {
-            System.out.println(" : " + attributes.get(attributes.size()-1).value((int) node.getLabel()));
+            if ((int) node.getLabel() == -1) // leaf
+                System.out.println(" : null");
+            else
+                System.out.println(" : " + attributes.get(attributes.size()-1).value((int) node.getLabel()));
         }
     }
 
-    public void printTable(ArrayList<Attribute> attributes) {
-        for (Map.Entry<Integer, Node> entry: table.entrySet()) {
-            if (entry.getValue().isLeaf()) {
-                System.out.println(entry.getKey() + ": " + attributes.get(attributes.size()-1).value((int) entry.getValue().getLabel()));
-            }
-            else {
-                System.out.println(entry.getKey() + ": " + attributes.get((int) entry.getValue().getName()).name());
-                HashMap<Double, Integer> children = entry.getValue().getChildren();
-                for (Map.Entry<Double, Integer> child: children.entrySet()) {
-                    System.out.println("\t" + attributes.get((int) entry.getValue().getName()).value(child.getKey().intValue()-1) + " -> " + child.getValue());
-                }
-            }
-        }
-    }
+//    public void printTable(ArrayList<Attribute> attributes) {
+//        for (Map.Entry<Integer, Node> entry: table.entrySet()) {
+//            if (entry.getValue().isLeaf()) {
+//                System.out.println(entry.getKey() + ": " + attributes.get(attributes.size()-1).value((int) entry.getValue().getLabel()));
+//            }
+//            else {
+//                System.out.println(entry.getKey() + ": " + attributes.get((int) entry.getValue().getName()).name());
+//                HashMap<Double, Integer> children = entry.getValue().getChildren();
+//                for (Map.Entry<Double, Integer> child: children.entrySet()) {
+//                    System.out.println("\t" + "[" + child.getKey() + "] " + attributes.get((int) entry.getValue().getName()).value(child.getKey().intValue()-1) + " -> " + child.getValue());
+//                }
+//            }
+//        }
+//    }
 }

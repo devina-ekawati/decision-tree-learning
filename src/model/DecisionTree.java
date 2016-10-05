@@ -162,16 +162,17 @@ public class DecisionTree {
                 }
             }
 
-            System.out.println(parent);
-            System.out.println("isAllSame = " + isAllSameClass);
-            System.out.println("DATA");
-            System.out.println(data);
+//            System.out.println(parent);
+//            System.out.println("isAllSame = " + isAllSameClass);
+//            System.out.println("DATA");
+//            System.out.println(data);
 
             if (isAllSameClass) {
                 // If all attribute have same label
                 Node child = new Node((double) data.classAttribute().index(), parent);
                 child.setLabel(data.instance(0).classValue());
                 tree.addNode(child, childValue);
+                // System.out.println("Add node -> parent: " + child.getParent() + " node: " + child.getName() + " leaf: " + child.getLabel() + " child value: " + childValue );
             } else {
                 // Assign root to best attribute
                 ArrayList<Attribute> newAttributes = new ArrayList<>();
@@ -180,10 +181,11 @@ public class DecisionTree {
                 }
 
                 int bestAttribute = findBestAttribute(data, newAttributes);
-                System.out.println("Best attr: " + data.attribute(bestAttribute).name());
+                // System.out.println("Best attr: " + bestAttribute + " " + data.attribute(bestAttribute).name());
 
                 Node root = new Node((double) bestAttribute, parent);
                 tree.addNode(root, childValue);
+                // System.out.println("Add node -> parent: " + root.getParent() + " node: " + root.getName() + " leaf: " + root.getLabel() + " child value: " + childValue );
 
                 int parentIndex = tree.getLastIdx();
 
@@ -195,7 +197,8 @@ public class DecisionTree {
                     attrValue++;
                     if (instances.numInstances() == 0) {
                         // Assign child to most common value
-                        Node child = new Node(findMostCommonClass(data), parent);
+                        Node child = new Node((double) -1, parentIndex); // TODO: ini bener ga sih harusnya diassign null?
+                        child.setLabel((double) -1);
                         tree.addNode(child, (double) attrValue);
                     } else {
                         newAttributes.set(bestAttribute, null);
