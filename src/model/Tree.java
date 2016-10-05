@@ -39,11 +39,40 @@ public class Tree {
         idx++;
     }
 
-    public void deleteNode(Integer idx) {
+    public void deleteNode(Integer idx, Double classValue) {
+        if (checkAllChildrenIsLeaf(idx)) {
+            Node node = getNode(idx);
+            HashMap<Double, Integer> children = node.getChildren();
+            //Hapus list childrennya
+            for (Map.Entry<Double, Integer> entry: children.entrySet()) {
+                System.out.println(entry);
+                //table.get(idx).deleteChild(entry.getValue());
+            }
+
+        } else {
+            //Rekursif disini kalau dia anaknya bukan leaf semua hrus hapus pohon anaknya juga
+        }
+
         // Delete parent information about this node
-        table.get(table.get(idx).getParent()).deleteChild(idx);
-        // Detele the node from table
-        table.remove(idx);
+//        table.get(table.get(idx).getParent()).deleteChild(idx);
+//        // Delete the node from table
+//        table.remove(idx);
+        //return tree;
+    }
+
+    public boolean checkAllChildrenIsLeaf (Integer idx) {
+        boolean check = true;
+        Node node = getNode(idx);
+        //System.out.println(node.getChildren());
+        HashMap<Double, Integer> children = node.getChildren();
+        for (Map.Entry<Double, Integer> entry: children.entrySet()) {
+            if (!getNode(entry.getValue()).isLeaf()) {
+                check = false;
+                break;
+            }
+
+        }
+        return check;
     }
 
     public Node getNode(Integer index) {

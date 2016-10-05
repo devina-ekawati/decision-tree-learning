@@ -2,12 +2,14 @@ import model.DecisionTree;
 import model.Tree;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import static model.DecisionTree.loadData;
 
@@ -35,10 +37,20 @@ public class MyJ48 extends Classifier{
         return Filter.useFilter(data, filter);
     }
 
+    public Instances normalizeDataset (Instances data) {
+        try {
+            data = discretizeInstances(data);
+            data = filterMissingValue(data);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
+
     @Override
     public void buildClassifier(Instances instances) throws Exception {
         DecisionTree decisionTree = new DecisionTree();
-        instances = discretizeInstances(instances);
+        instances = normalizeDataset(instances);
 
         ArrayList<Attribute> attributes = new ArrayList<>();
         ArrayList<Attribute> fixedAttribute = new ArrayList<>();

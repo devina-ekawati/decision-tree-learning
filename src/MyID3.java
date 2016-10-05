@@ -2,9 +2,7 @@ import model.DecisionTree;
 import model.Node;
 import model.Tree;
 import weka.classifiers.Classifier;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
+import weka.core.*;
 import weka.core.converters.ConverterUtils;
 
 import java.util.ArrayList;
@@ -23,6 +21,7 @@ public class MyID3 extends Classifier {
     @Override
     public void buildClassifier(Instances instances) throws Exception {
         DecisionTree decisionTree = new DecisionTree();
+        instances = normalizeDataset(instances);
 
         ArrayList<Attribute> attributes = new ArrayList<>();
         ArrayList<Attribute> fixedAttribute = new ArrayList<>();
@@ -41,6 +40,13 @@ public class MyID3 extends Classifier {
         Instance ins = instances.instance(4);
         System.out.println("Classify instance: " + ins);
         System.out.println("Result: " + classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) classifyInstance(ins)));
+        tree.deleteNode(1,1.0);
+        for (int i = 0; i < tree.getTable().size(); i++) {
+            System.out.println(tree.checkAllChildrenIsLeaf(i));
+        }
+
+        //System.out.println(tree.deleteNode(3,));
+
     }
 
     @Override
@@ -68,9 +74,26 @@ public class MyID3 extends Classifier {
         return truePrediction/instances.numInstances();
     }
 
+    public Instances normalizeDataset (Instances instances) throws Exception {
+        Enumeration enu = instances.enumerateAttributes();
+        while (enu.hasMoreElements()) {
+            Attribute attribute = (Attribute) enu.nextElement();
+            if (attribute.type() != Attribute.NOMINAL) {
+                throw new UnsupportedAttributeTypeException("MyID3 handles nominal variables only. Non-nominal variable in dataset detected.");
+            }
+            Enumeration enu2  = instances.enumerateInstances();
+            while (enu2.hasMoreElements()) {
+                if (((Instance)enu2.nextElement()).isMissing(attribute)) {
+                    throw new NoSupportForMissingValuesException("MyID3 : No missing values, please!");
+                }
+            }
+        }
+        return instances;
+    }
+
     public static void main(String[] args) {
         MyID3 myID3 = new MyID3();
-        Instances data = loadData("data/contact-lenses.arff");
+        Instances data = loadData("data/weather.nominal.arff");
 
         try {
             myID3.buildClassifier(data);

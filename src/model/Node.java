@@ -60,6 +60,7 @@ public class Node {
                 break;
             }
         }
+        System.out.println(children);
     }
 
     public Integer findChild(Double value) {
