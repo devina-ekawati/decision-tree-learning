@@ -5,6 +5,7 @@ import weka.core.Attribute;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 import java.util.ArrayList;
 
@@ -27,7 +28,12 @@ public class MyJ48 extends Classifier{
         return Filter.useFilter(data, filter);
     }
 
-    //Todo: bikin preprocess untuk nanganin missing value
+    public Instances filterMissingValue(Instances data) throws Exception {
+        ReplaceMissingValues filter = new ReplaceMissingValues();
+        filter.setInputFormat(data);
+
+        return Filter.useFilter(data, filter);
+    }
 
     @Override
     public void buildClassifier(Instances instances) throws Exception {
@@ -48,7 +54,7 @@ public class MyJ48 extends Classifier{
 
     public static void main(String[] args) {
         MyJ48 myJ48 = new MyJ48();
-        Instances data = loadData("data/weather.numeric.arff");
+        Instances data = loadData("data/weather.nominal - Copy.arff");
 
         try {
             myJ48.buildClassifier(data);
