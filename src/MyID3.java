@@ -21,7 +21,7 @@ public class MyID3 extends Classifier {
     public double calculateAccuracy(Instances instances, Tree tree) {
         int truePrediction = 0;
         for(int i=0; i<instances.numInstances(); i++) {
-            if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree))
+            if (instances.instance(i).classValue() == classifyInstance(instances.instance(i)))
                 truePrediction ++;
         }
         return truePrediction/instances.numInstances();
@@ -45,10 +45,11 @@ public class MyID3 extends Classifier {
         tree.print(fixedAttribute);
         System.out.println("Accuracy: " + calculateAccuracy(instances, tree));
 
+        Instance ins = instances.instance(4);
+        System.out.println("Classify instance: " + ins);
+        double res = classifyInstance(ins);
+        System.out.println("Result: " + classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) classifyInstance(ins)));
 
-//        Instance ins = instances.instance(4);
-//        System.out.println("Classify instance: " + ins);
-//        System.out.println("Result: " + classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) classifyInstance(ins)));
 //        tree.deleteNode(0,1.0);
 //        for (int i = 0; i < tree.getTable().size(); i++) {
 //            System.out.println(tree.checkAllChildrenIsLeaf(i));
@@ -60,18 +61,9 @@ public class MyID3 extends Classifier {
 
     }
 
-    public double classifyInstance(Instance instance, Tree tree) {
-        Node node = tree.getNode(0);
-        while (!node.isLeaf()) {
-            double attr = node.getName();
-            Integer childIdx = node.findChild(instance.value((int) attr) + 1);
-            node = tree.getNode(childIdx);
-        }
-
-        if ( (int) node.getLabel() == -1 )
-            return Instance.missingValue();
-        else
-            return node.getLabel();
+    @Override
+    public double classifyInstance(Instance instance) {
+        return DecisionTree.classifyInstance(instance, tree);
     }
 
     public Instances normalizeDataset (Instances instances) throws Exception {

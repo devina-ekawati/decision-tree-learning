@@ -12,6 +12,7 @@ import java.util.Map;
 public class Tree {
     private HashMap<Integer, Node> table = new HashMap<>();
     private int idx = 0;
+    private int depth = 0; //TODO: kurangi depth kalau hapus node?
 
     public Tree() {
 
@@ -27,12 +28,10 @@ public class Tree {
 
     public void addNode(Node node, Double childValue) {
         int currentIdx = idx;
+        node.setKey(idx);
         table.put(currentIdx, node);
-//        if (!node.isLeaf())
-//            System.out.println("ADD NODE: [" + idx + "] " + node.getName());
-//        else
-//            System.out.println("ADD NODE: [" + idx + "] " + node.getLabel() + " > leaf");
-//        System.out.println("PARENT: " + node.getParent() + " CHILD VALUE: " + childValue);
+        if (node.getLevel() > depth)
+            depth = node.getLevel();
         if (node.getParent() != -1) {
             table.get(node.getParent()).addChild(childValue, currentIdx);
         }
@@ -78,6 +77,10 @@ public class Tree {
                 table.get(idx).deleteChild(leafChildrenIdx.get(i));
             }
         }
+    }
+
+    public int getDepth() {
+        return depth;
     }
 
     public boolean checkAllChildrenIsLeaf (Integer idx) {

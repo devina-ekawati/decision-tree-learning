@@ -10,6 +10,7 @@ import java.util.Map;
  * Created by Tifani on 10/1/2016.
  */
 public class Node {
+    private int key;
     private double name;
     private double label;
     private HashMap<Double, Integer> children = new HashMap<>();
@@ -38,8 +39,16 @@ public class Node {
         return label;
     }
 
+    public int getKey() {
+        return key;
+    }
+
     public void setLabel(double label) {
         this.label = label;
+    }
+
+    public void setKey(int key) {
+        this.key = key;
     }
 
     public HashMap<Double, Integer> getChildren() {
@@ -70,6 +79,15 @@ public class Node {
 
     public Integer findChild(Double value) {
         return children.get(value);
+    }
+
+    public Double findBranch(Integer child) {
+        for (Map.Entry<Double, Integer> entry: children.entrySet()) {
+            if (entry.getValue() == child) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     public void print(Double childKey, ArrayList<Attribute> attribute) {

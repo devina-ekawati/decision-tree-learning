@@ -204,4 +204,19 @@ public class DecisionTree {
             }
         }
     }
+
+    public static double classifyInstance(Instance instance, Tree tree) {
+        Node node = tree.getNode(0);
+        while (!node.isLeaf()) {
+            double attr = node.getName();
+            System.out.println(attr);
+            Integer childIdx = node.findChild(instance.value((int) attr) + 1);
+            node = tree.getNode(childIdx);
+        }
+
+        if ( (int) node.getLabel() == -1 )
+            return Instance.missingValue();
+        else
+            return node.getLabel();
+    }
 }

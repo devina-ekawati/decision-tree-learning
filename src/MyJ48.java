@@ -11,6 +11,8 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import static model.DecisionTree.loadData;
 
@@ -98,6 +100,9 @@ public class MyJ48 extends Classifier{
         try {
             //buildClassifier
             buildClassifier(instances);
+            int currentDepth = tree.getDepth();
+
+
 
             //sepertinya perlu level di nodenya untuk pruning
 
@@ -112,9 +117,97 @@ public class MyJ48 extends Classifier{
         //
     }
 
+    private void prune(Instances instances, Tree tree, Node node) {
+        double prunedError = pessimisticError(instances, tree, node);
+        if (node.isLeaf()) //TODO: tifa ga ngerti ini maksudnya apa
+            return;
+        double childError = 0;
+        for (Map.Entry<Double, Integer> entry: node.getChildren().entrySet()) {
+            childError = pessimisticLeafError(instances, tree, node, entry.getKey());
+        }
+        if (prunedError < childError) { // prune
+            // tree.deleteNode(node.getKey(), node.); //TODO: classvalue
+
+        }
+    }
+
+    private double pessimisticError(Instances instances, Tree tree, Node node) {
+        int truePrediction = 0;
+        int falsePrediction = 0;
+        HashMap<Double, Double> pathToRoot = new HashMap<>(); // attr, val
+
+        Node evalNode = node;
+        while(evalNode.getParent() != -1) {
+            pathToRoot.put(tree.getNode(evalNode.getParent()).getName(), tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
+            evalNode = tree.getNode(evalNode.getParent());
+        }
+
+        for(int i=0; i<instances.numInstances(); i++) {
+            boolean correctBranch = true;
+            for (Map.Entry<Double, Double> entry: pathToRoot.entrySet()) {
+                if (!(instances.instance(i).value(entry.getKey().intValue()) == entry.getValue() )) { //TODO: tricky
+                    correctBranch = false;
+                    break;
+                }
+            }
+            if (correctBranch) {
+                if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree)) { //TODO: tricky
+                    truePrediction++;
+                } else {
+                    falsePrediction++;
+                }
+            }
+        }
+
+        double n = truePrediction + falsePrediction;
+        if (n != 0) {
+            double p = ((double) falsePrediction + 1.0) / (n + 2.0);
+            return n * (p + zalpha2 * Math.sqrt(p*(1.0-p) / (n+2.0)));
+        } else
+            return 0;
+    }
+
+    private double pessimisticLeafError(Instances instances, Tree tree, Node node, Double childValue) {
+        int truePrediction = 0;
+        int falsePrediction = 0;
+        HashMap<Double, Double> pathToRoot = new HashMap<>(); // attr, val
+
+        Node evalNode = node;
+        while(evalNode.getParent() != -1) {
+            pathToRoot.put(tree.getNode(evalNode.getParent()).getName(), tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
+            evalNode = tree.getNode(evalNode.getParent());
+        }
+
+        for(int i=0; i<instances.numInstances(); i++) {
+            boolean correctBranch = true;
+            for (Map.Entry<Double, Double> entry: pathToRoot.entrySet()) {
+                if (!(instances.instance(i).value(entry.getKey().intValue()) == entry.getValue() )) { //TODO: tricky
+                    if (!(instances.instance(i).value((int) node.getName()) == childValue )) {
+                        correctBranch = false;
+                        break;
+                    }
+                }
+            }
+            if (correctBranch) {
+                if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree)) { //TODO: tricky
+                    truePrediction++;
+                } else {
+                    falsePrediction++;
+                }
+            }
+        }
+
+        double n = truePrediction + falsePrediction;
+        if (n != 0) {
+            double p = ((double) falsePrediction + 1.0) / (n + 2.0);
+            return n * (p + zalpha2 * Math.sqrt(p*(1.0-p) / (n+2.0)));
+        } else
+            return 0;
+    }
+
     public static void main(String[] args) {
         MyJ48 myJ48 = new MyJ48();
-        Instances data = loadData("data/weather.numeric.arff");
+        Instances data = loadData("data/weather.nominal.arff");
 
         try {
             myJ48.buildClassifier(data);
