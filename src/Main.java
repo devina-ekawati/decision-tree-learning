@@ -129,37 +129,46 @@ public class Main {
         return classifier;
     }
 
+    public void classifyUnseenData(Instances data) throws Exception {
+        Instance unseenData = new Instance(data.numAttributes());
+        data.add(unseenData);
+        unseenData.setDataset(data);
+
+        for (int i = 0; i < data.numAttributes() - 1; i++) {
+            String[] attribute = data.attribute(i).toString().split(" ");
+            System.out.print(attribute[1] + " " + attribute[2] + ": ");
+            Scanner s = new Scanner(System.in);
+            unseenData.setValue(data.attribute(i), s.nextLine());
+        }
+
+        System.out.println();
+        System.out.println("Instance: " + unseenData);
+        System.out.println();
+
+        Classifier classifier = loadModel("model.dat");
+        String[] classAttribute = data.classAttribute().toString().split(" ");
+        System.out.println(classAttribute[1] + " " + classAttribute[2] + ": " + data.classAttribute().value((int) classifier.classifyInstance(unseenData)));
+    }
+
     public static void main(String args[]) throws Exception {
         Main m = new Main();
-        Instances data = m.loadData("data/weather.numeric.arff");
+        Instances data = m.loadData("data/weather.nominal.arff");
 
         if (data != null) {
             try {
-//                Instances newData = m.resample(data);
-//                Instances newData = m.removeAttribute(data, 1, false);
-//                System.out.println(newData);
+//                data = m.resample(data);
+//                data = m.removeAttribute(data, 1, false);
+//                System.out.println(data);
 
-                Id3 tree = new Id3();
-                m.classify(data, tree, 'c', 50);
+                System.out.println("----------- ID3 -----------");
+                Id3 id3 = new Id3();
+                m.classify(data, id3, 'c', 50);
+                m.classifyUnseenData(data);
 
-//                Instance unseenData = new Instance(data.numAttributes());
-//                data.add(unseenData);
-//                unseenData.setDataset(data);
-//
-//                for (int i = 0; i < data.numAttributes() - 1; i++) {
-//                    String[] attribute = data.attribute(i).toString().split(" ");
-//                    System.out.print(attribute[1] + " " + attribute[2] + ": ");
-//                    Scanner s = new Scanner(System.in);
-//                    unseenData.setValue(data.attribute(i), s.nextLine());
-//                }
-//
-//                System.out.println();
-//                System.out.println("Instance: " + unseenData);
-//                System.out.println();
-//
-//                Classifier classifier = m.loadModel("model.dat");
-//                String[] classAttribute = data.classAttribute().toString().split(" ");
-//                System.out.println(classAttribute[1] + " " + classAttribute[2] + ": " + data.classAttribute().value((int) classifier.classifyInstance(unseenData)));
+                System.out.println("----------- J48 -----------");
+                J48 j48 = new J48();
+                m.classify(data, j48, 'p', 50);
+                m.classifyUnseenData(data);
 
             } catch (Exception e) {
                 e.printStackTrace();
