@@ -149,9 +149,9 @@ public class DecisionTree {
         return cek;
     }
 
-    public void buildTree (Instances data, Tree tree, int parent, ArrayList<Attribute> attributes, Double childValue) {
+    public void buildTree (Instances data, Tree tree, int parent, ArrayList<Attribute> attributes, Double childValue, int level) {
         if (checkAttributesEmpty(attributes)) {
-            Node child = new Node(findMostCommonClass(data), parent);
+            Node child = new Node(findMostCommonClass(data), parent, level);
             tree.addNode(child, childValue);
         } else {
             boolean isAllSameClass = true;
@@ -162,14 +162,9 @@ public class DecisionTree {
                 }
             }
 
-//            System.out.println(parent);
-//            System.out.println("isAllSame = " + isAllSameClass);
-//            System.out.println("DATA");
-//            System.out.println(data);
-
             if (isAllSameClass) {
                 // If all attribute have same label
-                Node child = new Node((double) data.classAttribute().index(), parent);
+                Node child = new Node((double) data.classAttribute().index(), parent, level);
                 child.setLabel(data.instance(0).classValue());
                 tree.addNode(child, childValue);
                 // System.out.println("Add node -> parent: " + child.getParent() + " node: " + child.getName() + " leaf: " + child.getLabel() + " child value: " + childValue );
@@ -183,11 +178,12 @@ public class DecisionTree {
                 int bestAttribute = findBestAttribute(data, newAttributes);
                 // System.out.println("Best attr: " + bestAttribute + " " + data.attribute(bestAttribute).name());
 
-                Node root = new Node((double) bestAttribute, parent);
+                Node root = new Node((double) bestAttribute, parent, level);
                 tree.addNode(root, childValue);
                 // System.out.println("Add node -> parent: " + root.getParent() + " node: " + root.getName() + " leaf: " + root.getLabel() + " child value: " + childValue );
 
                 int parentIndex = tree.getLastIdx();
+                int currentLevel = level + 1;
 
                 Instances[] splitData = splitData(data, data.attribute(bestAttribute));
                 Enumeration enumAttr = data.attribute(bestAttribute).enumerateValues();
@@ -197,12 +193,12 @@ public class DecisionTree {
                     attrValue++;
                     if (instances.numInstances() == 0) {
                         // Assign child to most common value
-                        Node child = new Node(findMostCommonClass(data), parentIndex); // TODO: ini bener ga sih harusnya diassign null?
+                        Node child = new Node(findMostCommonClass(data), parentIndex, currentLevel);
                         child.setLabel(findMostCommonClass(data));
                         tree.addNode(child, (double) attrValue);
                     } else {
                         newAttributes.set(bestAttribute, null);
-                        buildTree(instances, tree, parentIndex, newAttributes, (double) attrValue);
+                        buildTree(instances, tree, parentIndex, newAttributes, (double) attrValue, currentLevel);
                     }
                 }
             }

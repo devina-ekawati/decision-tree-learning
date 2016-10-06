@@ -14,10 +14,16 @@ public class Node {
     private double label;
     private HashMap<Double, Integer> children = new HashMap<>();
     private int parent = -1;
+    private int level;
 
-    public Node(Double name, int parent) {
+    public Node(Double name, int parent, int level) {
         this.name = name;
         this.parent = parent;
+        this.level = level;
+    }
+
+    public int getLevel() {
+        return level;
     }
 
     public int getParent() {
@@ -68,8 +74,8 @@ public class Node {
 
     public void print(Double childKey, ArrayList<Attribute> attribute) {
         if (!isLeaf())
-            System.out.print(attribute.get((int) name).name() + " = " + attribute.get((int) name).value(childKey.intValue()-1));
+            System.out.print("Level " + level + ": " + attribute.get((int) name).name() + " = " + attribute.get((int) name).value(childKey.intValue()-1));
         else
-            System.out.print(attribute.get((int) name).value((int) label));
+            System.out.print("Level " + level + ": " + attribute.get((int) name).value((int) label));
     }
 }

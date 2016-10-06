@@ -86,13 +86,12 @@ public class MyJ48 extends Classifier{
         }
 
         tree = new Tree();
-        decisionTree.buildTree(instances, tree, -1, attributes, null);
+        decisionTree.buildTree(instances, tree, -1, attributes, null, 0);
         tree.print(fixedAttribute);
     }
 
 
     //Todo: Bikin fungsi buat hitung pessimistic error
-    //Todo: Nodenya ditambahin level atau ada fungsi buat ngetrack node itu levelnya di mana dari hash table
     //Todo: Fungsi pruningnya
 
     public void postPruning (Instances instances, Tree tree) {
@@ -115,7 +114,7 @@ public class MyJ48 extends Classifier{
 
     public static void main(String[] args) {
         MyJ48 myJ48 = new MyJ48();
-        Instances data = loadData("data/weather.nominal - Copy.arff");
+        Instances data = loadData("data/weather.numeric.arff");
 
         try {
             myJ48.buildClassifier(data);
