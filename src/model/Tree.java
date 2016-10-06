@@ -79,6 +79,16 @@ public class Tree {
         }
     }
 
+    public ArrayList<Integer> getAllParentOfLeafNodes () {
+        ArrayList<Integer> parentsOfLeafNodes = new ArrayList<>();
+        for (Map.Entry<Integer, Node> entry: table.entrySet()) {
+            if (checkAllChildrenIsLeaf(entry.getKey())) {
+                parentsOfLeafNodes.add(entry.getKey());
+            }
+        }
+        return parentsOfLeafNodes;
+    }
+
     public int getDepth() {
         return depth;
     }

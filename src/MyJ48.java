@@ -100,15 +100,24 @@ public class MyJ48 extends Classifier{
         try {
             //buildClassifier
             buildClassifier(instances);
-            int currentDepth = tree.getDepth();
+            ArrayList<Integer> parentsOfLeafNodes = new ArrayList<>();
 
+            parentsOfLeafNodes = tree.getAllParentOfLeafNodes();
 
+            for (int i = 0; i < parentsOfLeafNodes.size(); i++) {
+                Node node = tree.getNode(parentsOfLeafNodes.get(i));
+                double prunedError = pessimisticError(instances, tree, node);
+                double childError = 0;
+                for (Map.Entry<Double, Integer> entry: node.getChildren().entrySet()) {
+                    childError += pessimisticLeafError(instances, tree, node, entry.getKey());
+                }
 
-            //sepertinya perlu level di nodenya untuk pruning
+                if (prunedError < childError) {
+                    tree.deleteNode(parentsOfLeafNodes.get(i), findMostCommonClass(instances,tree,node)); //kayaknya instances yang uda displit deh cuman bingung gmn
+                }
+            }
 
             //Dari node dengan level tertinggi cek prunning untuk setiap anaknya
-
-            //
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,16 +128,50 @@ public class MyJ48 extends Classifier{
 
     private void prune(Instances instances, Tree tree, Node node) {
         double prunedError = pessimisticError(instances, tree, node);
-        if (node.isLeaf()) //TODO: tifa ga ngerti ini maksudnya apa
-            return;
         double childError = 0;
         for (Map.Entry<Double, Integer> entry: node.getChildren().entrySet()) {
             childError = pessimisticLeafError(instances, tree, node, entry.getKey());
         }
         if (prunedError < childError) { // prune
-            // tree.deleteNode(node.getKey(), node.); //TODO: classvalue
-
+            tree.deleteNode(node.getKey(), findMostCommonClass(instances, tree, node)); //TODO: classvalue
         }
+    }
+
+    private double findMostCommonClass (Instances instances, Tree tree, Node node) {
+        HashMap<Double, Double> pathToRoot = new HashMap<>(); // attr, val
+
+        Node evalNode = node;
+        while(evalNode.getParent() != -1) {
+            pathToRoot.put(tree.getNode(evalNode.getParent()).getName(), tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
+            evalNode = tree.getNode(evalNode.getParent());
+        }
+
+        double [] classCounts = new double[instances.numClasses()];
+        for(int i=0; i<instances.numInstances(); i++) {
+            boolean correctBranch = true;
+            for (Map.Entry<Double, Double> entry: pathToRoot.entrySet()) {
+                if (!(instances.instance(i).value(entry.getKey().intValue()) == entry.getValue() )) { //TODO: tricky
+                    correctBranch = false;
+                    break;
+                }
+            }
+            if (correctBranch) {
+                for (int j = 0; j < classCounts.length; j++) {
+                    if (j == instances.instance(i).classValue()) {
+                        classCounts[j]++;
+                    }
+                }
+            }
+        }
+
+        double max = 0;
+        for (int i = 0; i < classCounts.length; i++) {
+            if (max < classCounts[i]) {
+                max = classCounts[i];
+            }
+        }
+
+        return max;
     }
 
     private double pessimisticError(Instances instances, Tree tree, Node node) {
