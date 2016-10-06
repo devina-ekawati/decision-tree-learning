@@ -59,6 +59,7 @@ public class Tree {
 
         } else {
             //Rekursif disini kalau dia anaknya bukan leaf semua hrus hapus pohon anaknya juga
+            ArrayList<Integer> leafChildrenIdx = new ArrayList<>();
             ArrayList<Integer> notLeafChildrenIdx = new ArrayList<>();
 
 
@@ -66,19 +67,17 @@ public class Tree {
                 if (!getNode(entry.getValue()).isLeaf()) {
                     notLeafChildrenIdx.add(entry.getValue());
                 }
+                leafChildrenIdx.add(entry.getValue());
             }
 
             for (int i = 0; i < notLeafChildrenIdx.size(); i++) {
                 deleteNode(notLeafChildrenIdx.get(i), classValue);
             }
 
+            for (int i = 0; i < leafChildrenIdx.size(); i++) {
+                table.get(idx).deleteChild(leafChildrenIdx.get(i));
+            }
         }
-
-        // Delete parent information about this node
-//        table.get(table.get(idx).getParent()).deleteChild(idx);
-//        // Delete the node from table
-//        table.remove(idx);
-        //return tree;
     }
 
     public boolean checkAllChildrenIsLeaf (Integer idx) {
