@@ -18,6 +18,15 @@ import static model.DecisionTree.loadData;
 public class MyID3 extends Classifier {
     private Tree tree;
 
+    public double calculateAccuracy(Instances instances, Tree tree) {
+        int truePrediction = 0;
+        for(int i=0; i<instances.numInstances(); i++) {
+            if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree))
+                truePrediction ++;
+        }
+        return truePrediction/instances.numInstances();
+    }
+
     @Override
     public void buildClassifier(Instances instances) throws Exception {
         DecisionTree decisionTree = new DecisionTree();
@@ -34,26 +43,24 @@ public class MyID3 extends Classifier {
         decisionTree.buildTree(instances, tree, -1, attributes, null);
         System.out.println("Tree:");
         tree.print(fixedAttribute);
-        System.out.println("Accuracy: " + calculateAccuracy(instances));
+        System.out.println("Accuracy: " + calculateAccuracy(instances, tree));
 
 
         Instance ins = instances.instance(4);
         System.out.println("Classify instance: " + ins);
         System.out.println("Result: " + classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) classifyInstance(ins)));
-        tree.deleteNode(0,1.0);
-        for (int i = 0; i < tree.getTable().size(); i++) {
-            System.out.println(tree.checkAllChildrenIsLeaf(i));
-        }
-
-        tree.print(fixedAttribute);
-
-        //System.out.println(tree.deleteNode(3,));
+//        tree.deleteNode(0,1.0);
+//        for (int i = 0; i < tree.getTable().size(); i++) {
+//            System.out.println(tree.checkAllChildrenIsLeaf(i));
+//        }
+//
+//        tree.print(fixedAttribute);
+//
+//        //System.out.println(tree.deleteNode(3,));
 
     }
 
-    @Override
-    public double classifyInstance(Instance instance) {
-
+    public double classifyInstance(Instance instance, Tree tree) {
         Node node = tree.getNode(0);
         while (!node.isLeaf()) {
             double attr = node.getName();
@@ -65,15 +72,6 @@ public class MyID3 extends Classifier {
             return Instance.missingValue();
         else
             return node.getLabel();
-    }
-
-    public double calculateAccuracy(Instances instances) {
-        int truePrediction = 0;
-        for(int i=0; i<instances.numInstances(); i++) {
-            if (instances.instance(i).classValue() == classifyInstance(instances.instance(i)))
-                truePrediction ++;
-        }
-        return truePrediction/instances.numInstances();
     }
 
     public Instances normalizeDataset (Instances instances) throws Exception {

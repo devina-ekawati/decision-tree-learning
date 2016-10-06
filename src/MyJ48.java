@@ -1,4 +1,5 @@
 import model.DecisionTree;
+import model.Node;
 import model.Tree;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -18,6 +19,8 @@ import static model.DecisionTree.loadData;
  */
 public class MyJ48 extends Classifier{
     private Tree tree;
+    private double alpha = 0.25;
+    private double zalpha2 = alpha*10/2;
 
     public MyJ48() {
 
@@ -47,6 +50,29 @@ public class MyJ48 extends Classifier{
         return data;
     }
 
+    public double classifyInstance(Instance instance, Tree tree) {
+        Node node = tree.getNode(0);
+        while (!node.isLeaf()) {
+            double attr = node.getName();
+            Integer childIdx = node.findChild(instance.value((int) attr) + 1);
+            node = tree.getNode(childIdx);
+        }
+
+        if ( (int) node.getLabel() == -1 )
+            return Instance.missingValue();
+        else
+            return node.getLabel();
+    }
+
+    public double calculateAccuracy(Instances instances, Tree tree) {
+        int truePrediction = 0;
+        for(int i=0; i<instances.numInstances(); i++) {
+            if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree))
+                truePrediction ++;
+        }
+        return truePrediction/instances.numInstances();
+    }
+
     @Override
     public void buildClassifier(Instances instances) throws Exception {
         DecisionTree decisionTree = new DecisionTree();
@@ -62,6 +88,29 @@ public class MyJ48 extends Classifier{
         tree = new Tree();
         decisionTree.buildTree(instances, tree, -1, attributes, null);
         tree.print(fixedAttribute);
+    }
+
+
+    //Todo: Bikin fungsi buat hitung pessimistic error
+    //Todo: Nodenya ditambahin level atau ada fungsi buat ngetrack node itu levelnya di mana dari hash table
+    //Todo: Fungsi pruningnya
+
+    public void postPruning (Instances instances, Tree tree) {
+        try {
+            //buildClassifier
+            buildClassifier(instances);
+
+            //sepertinya perlu level di nodenya untuk pruning
+
+            //Dari node dengan level tertinggi cek prunning untuk setiap anaknya
+
+            //
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //
     }
 
     public static void main(String[] args) {
