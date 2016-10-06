@@ -40,10 +40,12 @@ public class MyID3 extends Classifier {
         Instance ins = instances.instance(4);
         System.out.println("Classify instance: " + ins);
         System.out.println("Result: " + classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) classifyInstance(ins)));
-        tree.deleteNode(1,1.0);
+        tree.deleteNode(0,1.0);
         for (int i = 0; i < tree.getTable().size(); i++) {
             System.out.println(tree.checkAllChildrenIsLeaf(i));
         }
+
+        tree.print(fixedAttribute);
 
         //System.out.println(tree.deleteNode(3,));
 

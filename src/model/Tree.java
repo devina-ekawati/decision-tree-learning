@@ -39,20 +39,39 @@ public class Tree {
         idx++;
     }
 
-    public void deleteNode(Integer idx, Double classValue) {
+    public void deleteNode(Integer idx, Double classValue) { //classValue: kelas yang paling banyak dari node yang akan dihapus
+        Node node = getNode(idx);
+        HashMap<Double, Integer> children = node.getChildren();
         if (checkAllChildrenIsLeaf(idx)) {
-            Node node = getNode(idx);
-            HashMap<Double, Integer> children = node.getChildren();
+            ArrayList<Integer> childrenIdx = new ArrayList<>();
+
             //Hapus list childrennya
             for (Map.Entry<Double, Integer> entry: children.entrySet()) {
-                System.out.println(entry);
-                //table.get(idx).deleteChild(entry.getValue());
+                childrenIdx.add(entry.getValue());
+            }
+
+            for (int i = 0; i < childrenIdx.size(); i++) {
+                table.get(idx).deleteChild(childrenIdx.get(i));
             }
 
             //Set nodenya dengan label classValue => ClassValue ditentukan dari kelas dengan instance terbanyak dari node sebelumnya
+            node.setLabel(classValue);
 
         } else {
             //Rekursif disini kalau dia anaknya bukan leaf semua hrus hapus pohon anaknya juga
+            ArrayList<Integer> notLeafChildrenIdx = new ArrayList<>();
+
+
+            for (Map.Entry<Double, Integer> entry: children.entrySet()) {
+                if (!getNode(entry.getValue()).isLeaf()) {
+                    notLeafChildrenIdx.add(entry.getValue());
+                }
+            }
+
+            for (int i = 0; i < notLeafChildrenIdx.size(); i++) {
+                deleteNode(notLeafChildrenIdx.get(i), classValue);
+            }
+
         }
 
         // Delete parent information about this node

@@ -53,7 +53,6 @@ public class Node {
     }
 
     public void deleteChild(Integer child) {
-        int idx;
         for (Map.Entry<Double, Integer> entry: children.entrySet()) {
             if (entry.getValue() == child) {
                 children.remove(entry.getKey());
