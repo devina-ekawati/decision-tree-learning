@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class MyEvaluation {
 
-    public static int[][] confusionMatrix(Instances dataset, List<String> result){
+    public static int[][] confusionMatrix(Instances dataset, Tree tree){
         int nclass = dataset.numClasses();
         int natr = dataset.numAttributes();
         int[][] matrix = new int[nclass][nclass];
@@ -60,7 +60,7 @@ public class MyEvaluation {
             }
             int toCopy = last - start;
             testingset = new Instances(instances, start, toCopy);
-
+            System.out.println("tes set: " + start + " " + last);
             trainingset = null;
             if (start>0) {
                 trainingset = new Instances(instances, 0, start);
@@ -105,7 +105,7 @@ public class MyEvaluation {
 //        System.out.println("Correctly Classified: "+correct);
 //        System.out.println("Incorrectly Classified: "+incorrect);
 //        System.out.println();
-        System.out.println("Cross validation with " + folds + " fold(s)");
+        System.out.println("Cross validation with " + folds + " fold(s) ");
         System.out.println("Average accuracy: "+avgacc*100+"%");
         System.out.println("Max accuracy: "+maxacc*100+"%");
         System.out.println();

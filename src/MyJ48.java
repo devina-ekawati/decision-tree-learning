@@ -93,7 +93,6 @@ public class MyJ48 extends Classifier{
 
         tree = new Tree();
         decisionTree.buildTree(instances, tree, -1, attributes, null, 0);
-        tree.print(fixedAttribute);
     }
 
     //Todo: Fungsi pruningnya
@@ -102,22 +101,29 @@ public class MyJ48 extends Classifier{
         try {
             //buildClassifier
             buildClassifier(instances);
-            ArrayList<Integer> parentsOfLeafNodes = new ArrayList<>();
+            ArrayList<Integer> parentsOfLeafNodes;
 
             parentsOfLeafNodes = tree.getAllParentOfLeafNodes();
+            // System.out.println("Parent of leaf nodes: " + parentsOfLeafNodes.toString());
 
             for (int i = 0; i < parentsOfLeafNodes.size(); i++) {
                 Node node = tree.getNode(parentsOfLeafNodes.get(i));
-                double prunedError = pessimisticError(instances, tree, node);
-                double childError = 0;
-                for (Map.Entry<Double, Integer> entry: node.getChildren().entrySet()) {
-                    childError += pessimisticLeafError(instances, tree, node, entry.getKey());
+                Integer parent = node.getParent();
+                if (prune(instances, tree, node)) {
+                    if (parent != 0)
+                        parentsOfLeafNodes.add(parent);
                 }
-
-                if (prunedError < childError) {
-                    tree.deleteNode(parentsOfLeafNodes.get(i), findMostCommonClass(instances,tree,node)); //kayaknya instances yang uda displit deh cuman bingung gmn
-                }
+//                double prunedError = pessimisticError(instances, tree, node);
+//                double childError = 0;
+//                for (Map.Entry<Double, Integer> entry: node.getChildren().entrySet()) {
+//                    childError += pessimisticLeafError(instances, tree, node, entry.getKey());
+//                }
+//
+//                if (prunedError < childError) {
+//                    tree.deleteNode(parentsOfLeafNodes.get(i), findMostCommonClass(instances,tree,node)); //kayaknya instances yang uda displit deh cuman bingung gmn
+//                }
             }
+            this.tree = tree;
 
             //Dari node dengan level tertinggi cek prunning untuk setiap anaknya
 
@@ -128,55 +134,64 @@ public class MyJ48 extends Classifier{
         //
     }
 
-    private void prune(Instances instances, Tree tree, Node node) {
+    private boolean prune(Instances instances, Tree tree, Node node) {
+        // System.out.println("==== CHECK PRUNE");
         double prunedError = pessimisticError(instances, tree, node);
         double childError = 0;
         for (Map.Entry<Double, Integer> entry: node.getChildren().entrySet()) {
-            childError += pessimisticLeafError(instances, tree, node, entry.getKey());
-            System.out.println(childError);
+            childError += pessimisticError(instances, tree, tree.getNode(entry.getValue()));
+            //System.out.println("CHILD ERROR: " + childError);
         }
+        //System.out.println("PRUNED ERROR: " + prunedError + "CHILD ERROR: " + childError);
         if (prunedError < childError) { // prune
-            System.out.println("Prune : " + prunedError +  " " + childError);
-            tree.deleteNode(node.getKey(), findMostCommonClass(instances, tree, node)); //TODO: classvalue
+           //System.out.println("Prune : " + prunedError +  " " + childError);
+            // findMostCommonClass(instances, tree, node);
+            tree.deleteNode(node.getKey(), findMostCommonClass(instances, tree, node));
+            return true;
+        } else {
+            return false;
         }
     }
 
     private double findMostCommonClass (Instances instances, Tree tree, Node node) {
         HashMap<Double, Double> pathToRoot = new HashMap<>(); // attr, val
-
         Node evalNode = node;
+
         while(evalNode.getParent() != -1) {
             pathToRoot.put(tree.getNode(evalNode.getParent()).getName(), tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
-
             evalNode = tree.getNode(evalNode.getParent());
         }
 
         double [] classCounts = new double[instances.numClasses()];
         for(int i=0; i<instances.numInstances(); i++) {
             boolean correctBranch = true;
+
             for (Map.Entry<Double, Double> entry: pathToRoot.entrySet()) {
-                if (!(instances.instance(i).value(entry.getKey().intValue()) == entry.getValue() )) { //TODO: tricky
+                if (!(instances.instance(i).value(entry.getKey().intValue()) == entry.getValue()-1 )) {
                     correctBranch = false;
                     break;
                 }
             }
             if (correctBranch) {
-                for (int j = 0; j < classCounts.length; j++) {
-                    if (j == instances.instance(i).classValue()) {
-                        classCounts[j]++;
-                    }
+                classCounts[(int) instances.instance(i).value(instances.numAttributes()-1)]++;
+            }
+        }
+
+        double id = 0.0;
+        if (classCounts.length > 0) {
+            double max = classCounts[0];
+            for (int i = 1; i < classCounts.length; i++) {
+                if (max < classCounts[i]) {
+                    max = classCounts[i];
+                    id = (double) i;
                 }
+
             }
         }
 
-        double max = 0;
-        for (int i = 0; i < classCounts.length; i++) {
-            if (max < classCounts[i]) {
-                max = classCounts[i];
-            }
-        }
+        //System.out.println("MAX NYAR " + id);
 
-        return max;
+        return id;
     }
 
     private double pessimisticError(Instances instances, Tree tree, Node node) {
@@ -185,13 +200,14 @@ public class MyJ48 extends Classifier{
         HashMap<Double, Double> pathToRoot = new HashMap<>(); // attr, val
 
         Node evalNode = node;
+        // System.out.println("EVALNODE: " + evalNode.getName() + "PARENT: " + evalNode.getParent());
         while(evalNode.getParent() != -1) {
             pathToRoot.put(tree.getNode(evalNode.getParent()).getName(), tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
-            System.out.println("FIND ROOT:" + tree.getNode(evalNode.getParent()).getName() + " " + tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
+            // System.out.println("FIND ROOT:" + tree.getNode(evalNode.getParent()).getName() + " " + tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
             evalNode = tree.getNode(evalNode.getParent());
         }
 
-        System.out.println(instances.numInstances());
+        // System.out.println(instances.numInstances());
         for(int i=0; i<instances.numInstances(); i++) {
             boolean correctBranch = true;
 
@@ -206,14 +222,14 @@ public class MyJ48 extends Classifier{
             if (correctBranch) {
                 if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree)) { //TODO: tricky
                     truePrediction++;
-                    System.out.println("SAMA");
+                    // System.out.println("SAMA");
                 } else {
                     falsePrediction++;
-                    System.out.println("BEDA");
+                    // System.out.println("BEDA");
                 }
             }
         }
-        System.out.println("SAMA:" + truePrediction + " BEDA:" + falsePrediction);
+        // System.out.println("SAMA:" + truePrediction + " BEDA:" + falsePrediction);
         double n = truePrediction + falsePrediction;
         if (n != 0) {
             double p = ((double) falsePrediction + 1.0) / (n + 2.0);
@@ -265,13 +281,30 @@ public class MyJ48 extends Classifier{
         Instances data = loadData("data/weather.nominal.arff");
 
         try {
-            myJ48.buildClassifier(data);
-            // myJ48.prune(data, myJ48.getTree(), myJ48.getTree().getNode(1));
+            ArrayList<Attribute> fixedAttribute = new ArrayList<>();
+            for (int i = 0; i < data.numAttributes(); i++) {
+                fixedAttribute.add(data.attribute(i));
+            }
 
-            System.out.println(myJ48.getTree().getNode(1).getName());
-            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(1)) + "\n");
-            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(4)) + "\n");
-            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(5)) + "\n");
+            myJ48.buildClassifier(data);
+            System.out.println("===TREE (BEFORE PRUNING) ===");
+            myJ48.getTree().print(fixedAttribute);
+            myJ48.postPruning(data, myJ48.getTree());
+
+            System.out.println();
+            System.out.println("===TREE (AFTER PRUNING) ===");
+            myJ48.getTree().print(fixedAttribute);
+            //myJ48.prune(data, myJ48.getTree(), myJ48.getTree().getNode(1));
+//            myJ48.getTree().print(fixedAttribute);
+//            HashMap<Integer, Node> table = myJ48.getTree().getTable();
+//            for (Map.Entry<Integer, Node> entry: table.entrySet()) {
+//                System.out.println("Node: " + entry.getValue().getName() + " Parent: " + entry.getValue().getParent());
+//            }
+//
+////            System.out.println(myJ48.getTree().getNode(1).getName());
+//            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(1)) + "\n");
+//            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(2)) + "\n");
+//            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(3)) + "\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
