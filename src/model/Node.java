@@ -55,18 +55,35 @@ public class Node {
         return children;
     }
 
+    /**
+     * Memeriksa apakah sebuah node merupakan root atau bukan
+     * @return true jika node merupakan root dan false jika tidak
+     */
     public boolean isRoot() {
         return parent == -1;
     }
 
+    /**
+     * Memeriksa apakah sebuah node merupakan leaf atau bukan
+     * @return true jika node merupakan leaf dan false jika tidak
+     */
     public boolean isLeaf() {
         return children.isEmpty();
     }
 
+    /**
+     * Menambah child sebuah node
+     * @param value nilai dari cabang yang menuju anak
+     * @param child id dari anak
+     */
     public void addChild(Double value, Integer child) {
         children.put(value, child);
     }
 
+    /**
+     * Menhapus child dari node
+     * @param child id child yang akan dihapus
+     */
     public void deleteChild(Integer child) {
         for (Map.Entry<Double, Integer> entry: children.entrySet()) {
             if (entry.getValue() == child) {
@@ -77,10 +94,20 @@ public class Node {
         System.out.println(children);
     }
 
+    /**
+     *
+     * @param value
+     * @return
+     */
     public Integer findChild(Double value) {
         return children.get(value);
     }
 
+    /**
+     *
+     * @param child
+     * @return
+     */
     public Double findBranch(Integer child) {
         for (Map.Entry<Double, Integer> entry: children.entrySet()) {
             if (entry.getValue() == child) {
@@ -90,6 +117,11 @@ public class Node {
         return null;
     }
 
+    /**
+     * Mencetak node ke layar
+     * @param childKey id dari anak
+     * @param attribute list atribut pada dataset yang digunakan untuk membangun pohon
+     */
     public void print(Double childKey, ArrayList<Attribute> attribute) {
         if (!isLeaf())
             System.out.print("Level " + level + ": " + attribute.get((int) name).name() + " = " + attribute.get((int) name).value(childKey.intValue()-1));
