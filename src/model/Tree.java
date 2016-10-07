@@ -82,8 +82,10 @@ public class Tree {
     public ArrayList<Integer> getAllParentOfLeafNodes () {
         ArrayList<Integer> parentsOfLeafNodes = new ArrayList<>();
         for (Map.Entry<Integer, Node> entry: table.entrySet()) {
+            // System.out.println("CHEK NODE: " + entry.getKey());
             if (checkAllChildrenIsLeaf(entry.getKey())) {
                 parentsOfLeafNodes.add(entry.getKey());
+                // System.out.println("LEAF PARENT : " + entry.getKey() + " ");
             }
         }
         return parentsOfLeafNodes;
@@ -94,18 +96,22 @@ public class Tree {
     }
 
     public boolean checkAllChildrenIsLeaf (Integer idx) {
-        boolean check = true;
         Node node = getNode(idx);
-        //System.out.println(node.getChildren());
-        HashMap<Double, Integer> children = node.getChildren();
-        for (Map.Entry<Double, Integer> entry: children.entrySet()) {
-            if (!getNode(entry.getValue()).isLeaf()) {
-                check = false;
-                break;
-            }
 
+        if(node.isLeaf()) { //Invalid for leaf
+            return false;
+        } else {
+            boolean check = true;
+            HashMap<Double, Integer> children = node.getChildren();
+            for (Map.Entry<Double, Integer> entry: children.entrySet()) {
+                if (!getNode(entry.getValue()).isLeaf()) {
+                    check = false;
+                    break;
+                }
+
+            }
+            return check;
         }
-        return check;
     }
 
     public Node getNode(Integer index) {

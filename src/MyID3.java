@@ -13,12 +13,18 @@ public class MyID3 extends Classifier {
     private Tree tree;
 
     public double calculateAccuracy(Instances instances, Tree tree) {
+        MyID3 myID3 = new MyID3();
+        myID3.setTree(tree);
         int truePrediction = 0;
         for(int i=0; i<instances.numInstances(); i++) {
-            if (instances.instance(i).classValue() == classifyInstance(instances.instance(i)))
+            if (instances.instance(i).classValue() == myID3.classifyInstance(instances.instance(i)))
                 truePrediction ++;
         }
-        return truePrediction/instances.numInstances();
+        return (double) truePrediction/ (double) instances.numInstances();
+    }
+
+    public void setTree(Tree tree) {
+        this.tree = tree;
     }
 
     public Tree getTree() {
@@ -65,7 +71,7 @@ public class MyID3 extends Classifier {
 
     public static void main(String[] args) {
         MyID3 myID3 = new MyID3();
-        Instances data = loadData("data/weather.nominal.arff");
+        Instances data = loadData("data/contact-lenses.arff");
         try {
             myID3.buildClassifier(data);
 
