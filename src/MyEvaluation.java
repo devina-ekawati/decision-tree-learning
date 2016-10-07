@@ -9,31 +9,6 @@ import java.util.List;
  */
 public class MyEvaluation {
 
-    public static int[][] confusionMatrix(Instances dataset, Tree tree){
-        int nclass = dataset.numClasses();
-        int natr = dataset.numAttributes();
-        int[][] matrix = new int[nclass][nclass];
-
-        for (int j=0; j<nclass; j++){
-            for (int k=0; k<nclass; k++){
-                matrix[j][k]=0;
-            }
-        }
-
-        for (int i=0; i < dataset.numInstances(); i++){
-            double dataclass = dataset.instance(i).value(natr);
-            for (int j=0; j<nclass; j++){ //actual values
-                for (int k=0; k<nclass; k++){ //prediction
-//                    if (dataclass == dataset.attribute(dataset.numAttributes()-1).value(j) && result.get(i).equals(classValues.get(k))){
-//                        matrix[j][k]++;
-//                    }
-                }
-            }
-        }
-
-        return matrix;
-    }
-
     public static void crossValidation(Instances instances, int folds, Classifier classifier) {
         double sumacc = 0;
         double maxacc = 0;
@@ -77,6 +52,18 @@ public class MyEvaluation {
                     myID3.buildClassifier(trainingset);
                     Tree tree = myID3.getTree();
                     double acc = myID3.calculateAccuracy(testingset, tree);
+                    sumacc += acc;
+                    if (acc > maxacc)
+                        maxacc = acc;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                MyJ48 myJ48 = new MyJ48();
+                try {
+                    myJ48.buildClassifier(trainingset);
+                    Tree tree = myJ48.getTree();
+                    double acc = myJ48.calculateAccuracy(testingset, tree);
                     sumacc += acc;
                     if (acc > maxacc)
                         maxacc = acc;
