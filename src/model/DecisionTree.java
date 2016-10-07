@@ -1,5 +1,6 @@
 package model;
 
+import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -209,7 +210,7 @@ public class DecisionTree {
         Node node = tree.getNode(0);
         while (!node.isLeaf()) {
             double attr = node.getName();
-            System.out.println(attr);
+            // System.out.println(attr);
             Integer childIdx = node.findChild(instance.value((int) attr) + 1);
             node = tree.getNode(childIdx);
         }
@@ -218,5 +219,14 @@ public class DecisionTree {
             return Instance.missingValue();
         else
             return node.getLabel();
+    }
+
+    public double calculateAccuracy(Instances instances, Tree tree) {
+        int truePrediction = 0;
+        for(int i=0; i<instances.numInstances(); i++) {
+            if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree))
+                truePrediction ++;
+        }
+        return truePrediction/instances.numInstances();
     }
 }

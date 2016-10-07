@@ -1,15 +1,9 @@
 import model.DecisionTree;
-import model.Node;
 import model.Tree;
 import weka.classifiers.Classifier;
 import weka.core.*;
-import weka.core.converters.ConverterUtils;
-
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Map;
-
-import static java.lang.Math.log;
 import static model.DecisionTree.loadData;
 
 /**
@@ -27,6 +21,10 @@ public class MyID3 extends Classifier {
         return truePrediction/instances.numInstances();
     }
 
+    public Tree getTree() {
+        return tree;
+    }
+
     @Override
     public void buildClassifier(Instances instances) throws Exception {
         DecisionTree decisionTree = new DecisionTree();
@@ -41,24 +39,6 @@ public class MyID3 extends Classifier {
 
         tree = new Tree();
         decisionTree.buildTree(instances, tree, -1, attributes, null, 0);
-        System.out.println("Tree:");
-        tree.print(fixedAttribute);
-        System.out.println("Accuracy: " + calculateAccuracy(instances, tree));
-
-        Instance ins = instances.instance(4);
-        System.out.println("Classify instance: " + ins);
-        double res = classifyInstance(ins);
-        System.out.println("Result: " + classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) classifyInstance(ins)));
-
-//        tree.deleteNode(0,1.0);
-//        for (int i = 0; i < tree.getTable().size(); i++) {
-//            System.out.println(tree.checkAllChildrenIsLeaf(i));
-//        }
-//
-//        tree.print(fixedAttribute);
-//
-//        //System.out.println(tree.deleteNode(3,));
-
     }
 
     @Override
@@ -86,9 +66,25 @@ public class MyID3 extends Classifier {
     public static void main(String[] args) {
         MyID3 myID3 = new MyID3();
         Instances data = loadData("data/weather.nominal.arff");
-
         try {
             myID3.buildClassifier(data);
+
+            ArrayList<Attribute> fixedAttribute = new ArrayList<>();
+            for (int i = 0; i < data.numAttributes(); i++) {
+                fixedAttribute.add(data.attribute(i));
+            }
+
+            System.out.println("===TREE===");
+            myID3.getTree().print(fixedAttribute);
+            System.out.println("Accuracy: " + myID3.calculateAccuracy(data, myID3.getTree()));
+            System.out.println("");
+            Instance ins = data.instance(4);
+            System.out.println("===TRY TO CLASSIFY INSTANCE===");
+            System.out.println("Classify instance: " + ins);
+            System.out.println("Result: " + myID3.classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) myID3.classifyInstance(ins)));
+            System.out.println("");
+            System.out.println("===CROSS VALIDATION===");
+            MyEvaluation.crossValidation(data, 10, myID3);
         } catch (Exception e) {
             e.printStackTrace();
         }
