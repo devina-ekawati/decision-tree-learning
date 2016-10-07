@@ -95,18 +95,18 @@ public class Node {
     }
 
     /**
-     *
-     * @param value
-     * @return
+     * Memperoleh key anak pada hash tabel berdasarkan value branch pohon
+     * @param value indeks atribut pada dataset
+     * @return hash key anak berdasarkan value
      */
     public Integer findChild(Double value) {
         return children.get(value);
     }
 
     /**
-     *
-     * @param child
-     * @return
+     * Memperoleh nilai branch yang mnghubungkan child ke sebuah node
+     * @param child id child
+     * @return nilai branch dalam bentuk double
      */
     public Double findBranch(Integer child) {
         for (Map.Entry<Double, Integer> entry: children.entrySet()) {

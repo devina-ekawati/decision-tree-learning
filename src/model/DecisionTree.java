@@ -16,6 +16,11 @@ import static java.lang.Math.log;
  */
 public class DecisionTree {
 
+    /**
+     * Melakukan load data arff
+     * @param filename nama file arff
+     * @return Instances hasil pembacaan file arff
+     */
     public static Instances loadData(String filename) {
         ConverterUtils.DataSource source;
         Instances data = null;
@@ -33,10 +38,20 @@ public class DecisionTree {
         return data;
     }
 
+    /**
+     * Menghitung 2log(x)
+     * @param x
+     * @return hasil perhitungan logaritma
+     */
     private double log2 (double x) {
         return log(x)/log(2);
     }
 
+    /**
+     * Menghitung total instance untuk setiap label
+     * @param data dataset yang digunakan
+     * @return array total instance untuk setiap label kelas
+     */
     private double[] countClassValue(Instances data) {
         double [] classCounts = new double[data.numClasses()];
         Enumeration instEnum = data.enumerateInstances();
@@ -48,6 +63,11 @@ public class DecisionTree {
         return classCounts;
     }
 
+    /**
+     * Menghitung entropy keseluruhan berdasarkan jumlah instance setiap kelas
+     * @param data dataset yang digunakan
+     * @return hasil perhitungan entropy
+     */
     private double calculateEntropy(Instances data) {
         double result = 0;
 
@@ -62,6 +82,12 @@ public class DecisionTree {
         return result;
     }
 
+    /**
+     * Memisahakan dataset berdasarkan nilai atribut
+     * @param data dataset yang digunakan
+     * @param att atribut yang digunakan untuk memisahkan dataset
+     * @return dataset yang telah dipisah
+     */
     private Instances[] splitData(Instances data, Attribute att) {
         Instances[] splitData = new Instances[att.numValues()];
         for (int j = 0; j < att.numValues(); j++) {
@@ -78,6 +104,12 @@ public class DecisionTree {
         return splitData;
     }
 
+    /**
+     * Menghitung entropy untuk sebuah atribut
+     * @param data dataset yang digunakan
+     * @param attribute atribut yang digunakan untuk menghitung entropy
+     * @return hasil perhitungan entropy
+     */
     public double calculateAttributeEntropy(Instances data, Attribute attribute) {
         double result = 0;
         // System.out.println("SUMMARY:");
@@ -102,11 +134,22 @@ public class DecisionTree {
         return result;
     }
 
-
+    /**
+     * Menghitung information gain
+     * @param data dataset yang digunakan
+     * @param attribute atribut yang digunakan untuk menghitung information gain
+     * @return hasil perhitungan information gain
+     */
     public double calculateInformationGain(Instances data, Attribute attribute) {
         return (calculateEntropy(data) - calculateAttributeEntropy(data,attribute));
     }
 
+    /**
+     * Mencari best attribute berdasarkan information gain
+     * @param data dataset yang digunakan
+     * @param attributes list atribut yang akan dipilih
+     * @return atribut yang terpilih
+     */
     private int findBestAttribute(Instances data, ArrayList<Attribute> attributes) {
         int idxMax = 0;
         while (attributes.get(idxMax) == null) {
@@ -126,6 +169,11 @@ public class DecisionTree {
         return idxMax;
     }
 
+    /**
+     * Mencari kelas yang paling banyak dimiliki instances
+     * @param data dataset yang digunakan
+     * @return kelas yang paling banyak dimiliki instances dalam bentuk double
+     */
     public double findMostCommonClass(Instances data) {
         double[] classCount = countClassValue(data);
 
@@ -139,6 +187,11 @@ public class DecisionTree {
         return (double) maxIndex;
     }
 
+    /**
+     * Memeriksa apakah list attributes telah kosong
+     * @param attributes list attribute yang akan diproses
+     * @return true jika list attributes kosong dan false jika tidak
+     */
     private boolean checkAttributesEmpty(ArrayList<Attribute> attributes) {
         boolean cek = true;
         for (int i = 0; i < attributes.size(); i++) {
@@ -150,6 +203,15 @@ public class DecisionTree {
         return cek;
     }
 
+    /**
+     * Membangun model decision tree berdasarkan dataset yang ada
+     * @param data dataset yang digunakan untuk membangun decision tree
+     * @param tree pohon yang terbentuk
+     * @param parent indeks parent saat ini
+     * @param attributes attribute yang digunakan untuk membangun pohon
+     * @param childValue nilai cabang yang menghubungkan parent ke child
+     * @param level ketinggian pohon saat ini
+     */
     public void buildTree (Instances data, Tree tree, int parent, ArrayList<Attribute> attributes, Double childValue, int level) {
         if (checkAttributesEmpty(attributes)) {
             Node child = new Node(findMostCommonClass(data), parent, level);
@@ -206,6 +268,12 @@ public class DecisionTree {
         }
     }
 
+    /**
+     * Melaukan klasifikasi instance berdasarkan pohon yang telah dibuat
+     * @param instance data yang akan diklasifikasi
+     * @param tree model pohon yang digunakan untuk melakukan klasifikasi
+     * @return kelas hasil klasifikasi
+     */
     public static double classifyInstance(Instance instance, Tree tree) {
         Node node = tree.getNode(0);
         while (!node.isLeaf()) {
@@ -221,6 +289,12 @@ public class DecisionTree {
             return node.getLabel();
     }
 
+    /**
+     * Menghitung akurasi model decision tree
+     * @param instances dataset yang digunakan untuk menghitung akurasi
+     * @param tree model decision tree yang akan dievaluasi
+     * @return akurasi dari model decision tree
+     */
     public double calculateAccuracy(Instances instances, Tree tree) {
         int truePrediction = 0;
         for(int i=0; i<instances.numInstances(); i++) {
