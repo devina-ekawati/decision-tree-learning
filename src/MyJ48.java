@@ -28,6 +28,10 @@ public class MyJ48 extends Classifier{
 
     }
 
+    public Tree getTree() {
+        return tree;
+    }
+
     private Instances discretizeInstances(Instances data) throws Exception {
         Discretize filter = new Discretize();
         filter.setInputFormat(data);
@@ -92,8 +96,6 @@ public class MyJ48 extends Classifier{
         tree.print(fixedAttribute);
     }
 
-
-    //Todo: Bikin fungsi buat hitung pessimistic error
     //Todo: Fungsi pruningnya
 
     public void postPruning (Instances instances, Tree tree) {
@@ -130,9 +132,11 @@ public class MyJ48 extends Classifier{
         double prunedError = pessimisticError(instances, tree, node);
         double childError = 0;
         for (Map.Entry<Double, Integer> entry: node.getChildren().entrySet()) {
-            childError = pessimisticLeafError(instances, tree, node, entry.getKey());
+            childError += pessimisticLeafError(instances, tree, node, entry.getKey());
+            System.out.println(childError);
         }
         if (prunedError < childError) { // prune
+            System.out.println("Prune : " + prunedError +  " " + childError);
             tree.deleteNode(node.getKey(), findMostCommonClass(instances, tree, node)); //TODO: classvalue
         }
     }
@@ -143,6 +147,7 @@ public class MyJ48 extends Classifier{
         Node evalNode = node;
         while(evalNode.getParent() != -1) {
             pathToRoot.put(tree.getNode(evalNode.getParent()).getName(), tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
+
             evalNode = tree.getNode(evalNode.getParent());
         }
 
@@ -182,13 +187,18 @@ public class MyJ48 extends Classifier{
         Node evalNode = node;
         while(evalNode.getParent() != -1) {
             pathToRoot.put(tree.getNode(evalNode.getParent()).getName(), tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
+            System.out.println("FIND ROOT:" + tree.getNode(evalNode.getParent()).getName() + " " + tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
             evalNode = tree.getNode(evalNode.getParent());
         }
 
+        System.out.println(instances.numInstances());
         for(int i=0; i<instances.numInstances(); i++) {
             boolean correctBranch = true;
+
             for (Map.Entry<Double, Double> entry: pathToRoot.entrySet()) {
-                if (!(instances.instance(i).value(entry.getKey().intValue()) == entry.getValue() )) { //TODO: tricky
+                //System.out.println(entry.getKey().intValue() + "==" + (entry.getValue().intValue()-1) );
+                // System.out.println("kucing");
+                if (!(instances.instance(i).value(entry.getKey().intValue()) == entry.getValue()-1 )) { //TODO: tricky
                     correctBranch = false;
                     break;
                 }
@@ -196,12 +206,14 @@ public class MyJ48 extends Classifier{
             if (correctBranch) {
                 if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree)) { //TODO: tricky
                     truePrediction++;
+                    System.out.println("SAMA");
                 } else {
                     falsePrediction++;
+                    System.out.println("BEDA");
                 }
             }
         }
-
+        System.out.println("SAMA:" + truePrediction + " BEDA:" + falsePrediction);
         double n = truePrediction + falsePrediction;
         if (n != 0) {
             double p = ((double) falsePrediction + 1.0) / (n + 2.0);
@@ -254,6 +266,12 @@ public class MyJ48 extends Classifier{
 
         try {
             myJ48.buildClassifier(data);
+            // myJ48.prune(data, myJ48.getTree(), myJ48.getTree().getNode(1));
+
+            System.out.println(myJ48.getTree().getNode(1).getName());
+            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(1)) + "\n");
+            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(4)) + "\n");
+            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(5)) + "\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
