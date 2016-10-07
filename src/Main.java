@@ -2,19 +2,15 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.Id3;
-import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Discretize;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.instance.RemovePercentage;
 import weka.filters.unsupervised.instance.Resample;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -23,6 +19,11 @@ import java.util.Scanner;
  */
 public class Main {
 
+    /**
+     * Membaca file arff
+     * @param filename nama file arff
+     * @return Instances hasil pembacaan file arff
+     */
     public Instances loadData(String filename) {
         DataSource source;
         Instances data = null;
@@ -40,6 +41,14 @@ public class Main {
         return data;
     }
 
+    /**
+     * Menghapus atribut dari dataset
+     * @param data dataset yang akan diproses
+     * @param attrIndex indeks atribut yang ingin dihapus dari instances
+     * @param isInvert true jika indeks atribut yang ingin dihapus diinversi dan false jika indeks atribut yang ingin dihapus tidak diinversi
+     * @return Instances yang telah dihapus atributnya
+     * @throws Exception
+     */
     public Instances removeAttribute(Instances data, String attrIndex, boolean isInvert) throws Exception {
         Remove remove = new Remove();
 
@@ -52,6 +61,12 @@ public class Main {
         return newData;
     }
 
+    /**
+     * Melakukan resampling terhadap dataset
+     * @param data dataset yang akan diproses
+     * @return Instances yang telah di-resampling
+     * @throws Exception
+     */
     public Instances resample(Instances data) throws Exception {
         Resample resample = new Resample();
 
@@ -65,6 +80,14 @@ public class Main {
         return newData;
     }
 
+    /**
+     * Membagi data berdasarkan persentase tertentu
+     * @param data dataset yang akan diproses
+     * @param percentage persentasi untuk membagi dataset
+     * @param isInverted true jika persentase split diinversi dan false jika tidak
+     * @return dataset yang telah dibagi
+     * @throws Exception
+     */
     public Instances percentageSplit(Instances data, int percentage, boolean isInverted) throws Exception {
         RemovePercentage percentageSplit = new RemovePercentage();
 
@@ -78,6 +101,13 @@ public class Main {
         return newData;
     }
 
+    /**
+     * Melakukan evaluasi dengan metode 10 fold cross validation
+     * @param data data yang akan dievaluasi
+     * @param tree jenis classifier yang digunakan untuk melakukan evaluasi
+     * @return hasil evaluasi 10 fold cross validation
+     * @throws Exception
+     */
     public Evaluation crossValidation(Instances data, Classifier tree) throws Exception {
         Evaluation testEval = null;
         testEval = new Evaluation(data);
@@ -86,18 +116,24 @@ public class Main {
         return testEval;
     }
 
+    /**
+     * Melakukan klasifikasi, menyimpan model ke dalam file "model.dat", dan mencetak hasilnya ke layar
+     * @param data dataset yang digunakan
+     * @param tree classifier yang digunakan untuk melakukan klasifikasi
+     * @param evaluation 'c' jika evaluasi yang digunakan adalah 10 fold cross validation dan
+     *                   'p' jika evaluasi yang digunakan adalah percentage split
+     * @param percentage persentase split data untuk evaluasi percentage split
+     */
     public void classify(Instances data, Classifier tree, char evaluation, int percentage) {
         try {
 
-            Evaluation testEval;
+            Evaluation testEval = null;
 
             if (evaluation == 'c') {
                 tree.buildClassifier(data);   // build classifier
 
-                saveModel("model.dat", tree);
-
                 testEval = crossValidation(data, tree);
-            } else {
+            } else if (evaluation == 'p'){
                 Instances trainData = percentageSplit(data, percentage, false);
                 tree.buildClassifier(trainData);
 
@@ -107,6 +143,7 @@ public class Main {
                 testEval.evaluateModel(tree, testData);
             }
 
+            saveModel("model.dat", tree);
 
             System.out.println(testEval.toSummaryString("\nResults\n======\n", false));
         } catch (Exception e) {
@@ -114,6 +151,12 @@ public class Main {
         }
     }
 
+    /**
+     * Menyimpan model
+     * @param fileName nama file model yang akan disimpan
+     * @param classifier jenis classifier yang digunakan
+     * @throws IOException
+     */
     public void saveModel(String fileName, Classifier classifier) throws IOException {
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileName));
         oos.writeObject(classifier);
@@ -121,6 +164,13 @@ public class Main {
         oos.close();
     }
 
+    /**
+     * Melakukan load model
+     * @param fileName nama fle model yang akan di-load
+     * @return classifier hasil dari load model
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
     public Classifier loadModel(String fileName) throws IOException, ClassNotFoundException {
         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileName));
         Classifier classifier = (Classifier) ois.readObject();
@@ -129,6 +179,11 @@ public class Main {
         return classifier;
     }
 
+    /**
+     * Melakukan klasifikasi unseen data (data yang tidak diketahui kelasnya)
+     * @param data data yang digunakan untuk melakukan klasifikasi
+     * @throws Exception
+     */
     public void classifyUnseenData(Instances data) throws Exception {
         Instance unseenData = new Instance(data.numAttributes());
         data.add(unseenData);
