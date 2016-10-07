@@ -291,17 +291,7 @@ public class MyJ48 extends Classifier{
             System.out.println();
 
             System.out.println("===CROSS VALIDATION===");
-            MyEvaluation.crossValidation(data, 10, myJ48);
-
-
-            // myJ48.prune(data, myJ48.getTree(), myJ48.getTree().getNode(1));
-//            myJ48.getTree().print(fixedAttribute);
-
-//
-////            System.out.println(myJ48.getTree().getNode(1).getName());
-//            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(2)) + "\n");
-//            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(3)) + "\n");
-//            System.out.println(myJ48.pessimisticError(data, myJ48.getTree(), myJ48.getTree().getNode(4)) + "\n");
+            MyEvaluation.crossValidation(norm, 10, myJ48);
         } catch (Exception e) {
             e.printStackTrace();
         }
