@@ -98,13 +98,14 @@ public class MyJ48 extends Classifier{
     //Todo: Fungsi pruningnya
 
     public void postPruning (Instances instances, Tree tree) {
+        instances = normalizeDataset(instances);
         try {
             //buildClassifier
             buildClassifier(instances);
             ArrayList<Integer> parentsOfLeafNodes;
 
             parentsOfLeafNodes = tree.getAllParentOfLeafNodes();
-            System.out.println("Parent of leaf nodes: " + parentsOfLeafNodes.toString());
+            // System.out.println("Parent of leaf nodes: " + parentsOfLeafNodes.toString());
 
             for (int i = 0; i < parentsOfLeafNodes.size(); i++) {
                 Node node = tree.getNode(parentsOfLeafNodes.get(i));
@@ -136,13 +137,15 @@ public class MyJ48 extends Classifier{
 
     private boolean prune(Instances instances, Tree tree, Node node) {
         // System.out.println("==== CHECK PRUNE");
+        //System.out.println("====error parent");
         double prunedError = pessimisticError(instances, tree, node);
         double childError = 0;
+        //System.out.println("====error child");
         for (Map.Entry<Double, Integer> entry: node.getChildren().entrySet()) {
             childError += pessimisticError(instances, tree, tree.getNode(entry.getValue()));
             //System.out.println("CHILD ERROR: " + childError);
         }
-        System.out.println("PRUNED ERROR: " + prunedError + " CHILD ERROR: " + childError);
+        // System.out.println("PRUNED ERROR: " + prunedError + " CHILD ERROR: " + childError);
         if (prunedError < childError) { // prune
            System.out.println("PRUNING!");
             // findMostCommonClass(instances, tree, node);
@@ -200,14 +203,15 @@ public class MyJ48 extends Classifier{
         HashMap<Double, Double> pathToRoot = new HashMap<>(); // attr, val
 
         Node evalNode = node;
-        System.out.println("EVALNODE: " + evalNode.getName() + " PARENT: " + evalNode.getParent());
+        // System.out.println("EVALNODE: " + evalNode.getName() + " PARENT: " + evalNode.getParent());
         while(evalNode.getParent() != -1) {
             pathToRoot.put(tree.getNode(evalNode.getParent()).getName(), tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
-            System.out.println("FIND ROOT:" + tree.getNode(evalNode.getParent()).getName() + " " + tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
+            // System.out.println("FIND ROOT:" + tree.getNode(evalNode.getParent()).getName() + " " + tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
             evalNode = tree.getNode(evalNode.getParent());
         }
 
         // System.out.println(instances.numInstances());
+        double [] classCounts = new double[instances.numClasses()];
         for(int i=0; i<instances.numInstances(); i++) {
             boolean correctBranch = true;
 
@@ -220,60 +224,43 @@ public class MyJ48 extends Classifier{
                 }
             }
             if (correctBranch) {
-                if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree)) { //TODO: tricky
-                    truePrediction++;
-                    // System.out.println("SAMA");
-                } else {
-                    falsePrediction++;
-                    // System.out.println("BEDA");
-                }
+                classCounts[(int) instances.instance(i).value(instances.numAttributes()-1)]++;
+                // System.out.println("SAMA CABANG");
+//                if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree)) { //TODO: tricky
+//                    truePrediction++;
+//                    // System.out.println("SAMA");
+//                } else {
+//                    falsePrediction++;
+//                    // System.out.println("BEDA");
+//                }
+            } else {
+                // System.out.println("BEDA CABANG");
             }
         }
-        // System.out.println("SAMA:" + truePrediction + " BEDA:" + falsePrediction);
-        double n = truePrediction + falsePrediction;
+        double n = classCounts[0];
+        double wrong = classCounts[0];
+        for(int i=1; i<instances.numClasses(); i++) {
+            n += classCounts[i];
+            if (wrong > classCounts[i])
+                wrong = classCounts[i];
+        }
+        // System.out.println("false: " + wrong + " total:" + n);
+//        System.out.println("true:" + truePrediction + " false:" + falsePrediction);
+//        double n = truePrediction + falsePrediction;
+//        double wrong = truePrediction;
+//        if (wrong > falsePrediction)
+//            wrong = falsePrediction;
         if (n != 0) {
-            double p = ((double) falsePrediction + 1.0) / (n + 2.0);
+            double p = (wrong + 1.0) / (n + 2.0);
+            // System.out.println("ERROR: " + (n * (p + zalpha2 * Math.sqrt(p*(1.0-p) / (n+2.0)))));
             return n * (p + zalpha2 * Math.sqrt(p*(1.0-p) / (n+2.0)));
         } else
             return 0;
     }
 
-    private double pessimisticLeafError(Instances instances, Tree tree, Node node, Double childValue) {
-        int truePrediction = 0;
-        int falsePrediction = 0;
-        HashMap<Double, Double> pathToRoot = new HashMap<>(); // attr, val
-
-        Node evalNode = node;
-        while(evalNode.getParent() != -1) {
-            pathToRoot.put(tree.getNode(evalNode.getParent()).getName(), tree.getNode(evalNode.getParent()).findBranch(evalNode.getKey()));
-            evalNode = tree.getNode(evalNode.getParent());
-        }
-
-        for(int i=0; i<instances.numInstances(); i++) {
-            boolean correctBranch = true;
-            for (Map.Entry<Double, Double> entry: pathToRoot.entrySet()) {
-                if (!(instances.instance(i).value(entry.getKey().intValue()) == entry.getValue() )) { //TODO: tricky
-                    if (!(instances.instance(i).value((int) node.getName()) == childValue )) {
-                        correctBranch = false;
-                        break;
-                    }
-                }
-            }
-            if (correctBranch) {
-                if (instances.instance(i).classValue() == classifyInstance(instances.instance(i), tree)) { //TODO: tricky
-                    truePrediction++;
-                } else {
-                    falsePrediction++;
-                }
-            }
-        }
-
-        double n = truePrediction + falsePrediction;
-        if (n != 0) {
-            double p = ((double) falsePrediction + 1.0) / (n + 2.0);
-            return n * (p + zalpha2 * Math.sqrt(p*(1.0-p) / (n+2.0)));
-        } else
-            return 0;
+    @Override
+    public double classifyInstance(Instance instance) {
+        return DecisionTree.classifyInstance(instance, tree);
     }
 
     public static void main(String[] args) {
@@ -290,15 +277,21 @@ public class MyJ48 extends Classifier{
             System.out.println("===TREE (BEFORE PRUNING) ===");
             myJ48.getTree().print(fixedAttribute);
             System.out.println();
-            HashMap<Integer, Node> table = myJ48.getTree().getTable();
-            for (Map.Entry<Integer, Node> entry: table.entrySet()) {
-                System.out.println("Node: " + entry.getValue().getName() + " Parent: " + entry.getValue().getParent());
-            }
 
             myJ48.postPruning(data, myJ48.getTree());
-            System.out.println();
             System.out.println("===TREE (AFTER PRUNING) ===");
             myJ48.getTree().print(fixedAttribute);
+
+            System.out.println();
+            Instances norm = myJ48.normalizeDataset(data);
+            Instance ins = norm.instance(1);
+            System.out.println("===TRY TO CLASSIFY INSTANCE===");
+            System.out.println("Classify instance: " + ins);
+            System.out.println("Result: " + myJ48.classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) myJ48.classifyInstance(ins)));
+            System.out.println();
+
+            System.out.println("===CROSS VALIDATION===");
+            MyEvaluation.crossValidation(data, 10, myJ48);
 
 
             // myJ48.prune(data, myJ48.getTree(), myJ48.getTree().getNode(1));
