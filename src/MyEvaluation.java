@@ -60,7 +60,6 @@ public class MyEvaluation {
             }
             int toCopy = last - start;
             testingset = new Instances(instances, start, toCopy);
-            System.out.println("tes set: " + start + " " + last);
             trainingset = null;
             if (start>0) {
                 trainingset = new Instances(instances, 0, start);
@@ -85,41 +84,14 @@ public class MyEvaluation {
                     e.printStackTrace();
                 }
             }
-
-//            int[][] cmatrix = confusionMatrix(testingset,testSet(testingset,createModel(trainingset)));
-//            for (int j=0; j<classValues.size(); j++){
-//                for (int k=0; k<classValues.size(); k++){
-//                    matrix[j][k] += (float)cmatrix[j][k];
-//                }
-//            }
         }
         float avgacc = (float)sumacc/(float)folds;
-        int correct = 0;
-        int incorrect = 0;
-        for (int j=0; j<instances.numClasses(); j++){
-            for (int k=0; k<instances.numClasses(); k++){
-                if (j==k) correct+=matrix[j][k];
-                else incorrect+=matrix[j][k];
-            }
-        }
-//        System.out.println("Correctly Classified: "+correct);
-//        System.out.println("Incorrectly Classified: "+incorrect);
-//        System.out.println();
+
         System.out.println("Cross validation with " + folds + " fold(s) ");
         System.out.println("Average accuracy: "+avgacc*100+"%");
         System.out.println("Max accuracy: "+maxacc*100+"%");
         System.out.println();
-//        System.out.println("Confusion Matrix");
-//        for (int i=0; i<classValues.size();i++){
-//            writer.print((char)(97+i) + "\t");
-//        }
-//        System.out.println("<-- classified as");
-//        for (int j=0; j<classValues.size(); j++){
-//            for (int k=0; k<classValues.size(); k++){
-//                System.out.printf("%.0f",matrix[j][k]);
-//                System.out.print("\t");
-//            }
-//            System.out.println("|  "+(char)(97+j) +" = " + classValues.get(j));
-//        }
     }
+
+
 }
