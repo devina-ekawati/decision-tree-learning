@@ -276,6 +276,7 @@ public class DecisionTree {
      */
     public static double classifyInstance(Instance instance, Tree tree) {
         Node node = tree.getNode(0);
+
         while (!node.isLeaf()) {
             double attr = node.getName();
             // System.out.println(attr);

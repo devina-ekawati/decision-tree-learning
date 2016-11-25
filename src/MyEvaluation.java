@@ -29,7 +29,6 @@ public class MyEvaluation {
         for (int i=0;i<folds;i++) {
             start = last;
             last = start + instances.numInstances()/folds;
-            // System.out.println("i: " + i + " start: " + start + " last: " + last);
             if (i < instances.numInstances() % folds) {
                 last++;
             }

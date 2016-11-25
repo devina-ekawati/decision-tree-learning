@@ -211,10 +211,6 @@ public class Main {
 
         if (data != null) {
             try {
-//                data = m.resample(data);
-//                data = m.removeAttribute(data, 1, false);
-//                System.out.println(data);
-
                 System.out.println("----------- ID3 -----------");
                 Id3 id3 = new Id3();
                 m.classify(data, id3, 'c', 50);

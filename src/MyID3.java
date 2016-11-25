@@ -1,9 +1,12 @@
 import model.DecisionTree;
 import model.Tree;
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.core.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Random;
+
 import static model.DecisionTree.loadData;
 
 /**
@@ -71,26 +74,47 @@ public class MyID3 extends Classifier {
 
     public static void main(String[] args) {
         MyID3 myID3 = new MyID3();
-        Instances data = loadData("data/contact-lenses.arff");
+        Instances data = loadData("data/weather.nominal.arff");
         try {
-            myID3.buildClassifier(data);
+            // myID3.buildClassifier(data);
 
             ArrayList<Attribute> fixedAttribute = new ArrayList<>();
             for (int i = 0; i < data.numAttributes(); i++) {
                 fixedAttribute.add(data.attribute(i));
             }
+//
+//            System.out.println("===TREE===");
+//            myID3.getTree().print(fixedAttribute);
+////            System.out.println("Accuracy: " + myID3.calculateAccuracy(data, myID3.getTree()));
+////            System.out.println("");
+////            Instance ins = data.instance(4);
+////            System.out.println("===TRY TO CLASSIFY INSTANCE===");
+////            System.out.println("Classify instance: " + ins);
+////            System.out.println("Result: " + myID3.classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) myID3.classifyInstance(ins)));
+//            System.out.println("");
+//            System.out.println("===CROSS VALIDATION===");
+//            // MyEvaluation.crossValidation(data, 7, myID3);
+            Evaluation testEval = null;
+            testEval = new Evaluation(data);
+            Classifier temp = Classifier.makeCopy((myID3));
+            myID3.buildClassifier(data);
+            testEval.crossValidateModel(temp, data, 10, new Random(1));
+            System.out.println("----------- ID3 -----------");
 
-            System.out.println("===TREE===");
+            System.out.println();
+            System.out.println("Tree");
+            System.out.println("====");
+            System.out.println();
             myID3.getTree().print(fixedAttribute);
-            System.out.println("Accuracy: " + myID3.calculateAccuracy(data, myID3.getTree()));
-            System.out.println("");
-            Instance ins = data.instance(4);
-            System.out.println("===TRY TO CLASSIFY INSTANCE===");
-            System.out.println("Classify instance: " + ins);
-            System.out.println("Result: " + myID3.classifyInstance(ins) + " " + fixedAttribute.get(fixedAttribute.size()-1).value((int) myID3.classifyInstance(ins)));
-            System.out.println("");
-            System.out.println("===CROSS VALIDATION===");
-            MyEvaluation.crossValidation(data, 10, myID3);
+            System.out.println();
+            System.out.println();
+
+            System.out.println("Results");
+            System.out.println("=======");
+            System.out.println(testEval.toSummaryString());
+            System.out.println(testEval.toClassDetailsString());
+            System.out.println(testEval.toMatrixString());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
